@@ -1,0 +1,132 @@
+import unittest
+import pytest
+import os
+import sys
+from unittest import mock
+from msopst.st.interface import utils
+from msopst.st.interface.const_manager import ConstManager
+from msopst.st.interface.st_report import OpSTReport
+from msopst.st.interface.acl_op_runner import AclOpRunner
+from msopst.st.interface.atc_transform_om import AtcTransformOm
+from msopst.st.interface.advance_ini_parser import AdvanceIniParser
+
+sys.path.append(os.path.dirname(__file__) + "/../../")
+MSOPST_CONF_INI = './test_msopst/st/golden/base_case/input/msopst.ini'
+CASE_LIST = [{'op': 'Op'}]
+
+
+class Process():
+    def __init__(self, return_code=1):
+        self.returncode = return_code
+
+    def poll(self):
+        return "None"
+
+
+
+class TestUtilsMethods(unittest.TestCase):
+    def test_msopst_compile1(self):
+        with pytest.raises(utils.OpTestGenException) as error:
+            with mock.patch('os.path.exists', return_value=False):
+                runner = AclOpRunner('/home', 'ddd', 'report')
+                runner.acl_compile()
+        self.assertEqual(error.value.args[0],
+                         ConstManager.OP_TEST_GEN_INVALID_DATA_ERROR)
+    
+    '''
+    def test_msopst_compile2(self):
+        report = OpSTReport()
+        process = Process()
+        with mock.patch('msopst.st.interface.utils.check_path_valid'):
+            with mock.patch('os.path.exists', return_value=True), mock.patch('os.chdir'):
+                with mock.patch('subprocess.Popen', return_value=process), mock.patch('os.chmod'):
+                    runner = AclOpRunner('/home', 'ddd', report)
+                    runner.acl_compile()
+
+    def test_msopst_compile3(self):
+        report = OpSTReport()
+        with mock.patch('msopst.st.interface.utils.check_path_valid'):
+            with mock.patch(
+                    'msopst.st.interface.utils.execute_command'):
+                with mock.patch('os.path.exists', return_value=True), mock.patch('os.chdir'):
+                    with mock.patch('os.chmod'):
+                        runner = AclOpRunner('/home', 'ddd', report)
+                        runner.acl_compile()
+    '''
+
+    def test_msopst_run1(self):
+        report = OpSTReport()
+        with pytest.raises(utils.OpTestGenException) as error:
+            with mock.patch('os.path.exists', return_value=False):
+                runner = AclOpRunner('/home', 'ddd', report)
+                runner.run()
+        self.assertEqual(error.value.args[0],
+                         ConstManager.OP_TEST_GEN_INVALID_DATA_ERROR)
+
+    def test_msopst_run2(self):
+        report = OpSTReport()
+        with mock.patch('msopst.st.interface.utils.check_path_valid'):
+            with mock.patch(
+                    'msopst.st.interface.utils.execute_command'):
+                with mock.patch('os.path.exists',
+                                return_value=True), mock.patch('os.chdir'):
+                    runner = AclOpRunner('/home', 'ddd', report)
+                    runner.run()
+
+    def test_msopst_run3(self):
+        report = OpSTReport()
+        with mock.patch('msopst.st.interface.utils.check_path_valid'):
+            with mock.patch(
+                    'msopst.st.interface.utils.execute_command'):
+                with mock.patch('os.path.exists',
+                                return_value=True), mock.patch('os.chdir'):
+                    runner = AclOpRunner('/home', 'ddd', report)
+                    runner.run()
+
+    def test_msopst_run4(self):
+        report = OpSTReport()
+        with mock.patch('msopst.st.interface.utils.check_path_valid'):
+            with mock.patch(
+                    'msopst.st.interface.utils.execute_command'):
+                with mock.patch('os.path.exists',
+                                return_value=True), mock.patch('os.chdir'):
+                    advance = AdvanceIniParser(MSOPST_CONF_INI)
+                    runner = AclOpRunner('/home', 'ddd', report, advance)
+                    runner.run()
+
+    def test_msopst_get_atc_cmd(self):
+        with mock.patch('msopst.st.interface.utils.check_path_valid'):
+            with mock.patch('os.makedirs', return_value=True):
+                AtcTransformOm._get_atc_cmd('Ascend310', None)
+
+    def test_msopst_set_log_level_env(self):
+        with mock.patch('msopst.st.interface.utils.check_path_valid'):
+            AtcTransformOm._set_log_level_env(None)
+
+    def test_msopst_prof_run1(self):
+        with mock.patch('os.getenv', return_value="/home"):
+            with mock.patch('os.path.exists', return_value=True):
+                with mock.patch(
+                        'msopst.st.interface.utils.execute_command'):
+                    report = OpSTReport()
+                    advance = AdvanceIniParser(MSOPST_CONF_INI)
+                    runner = AclOpRunner('/home', 'ddd', report, advance)
+                    runner.prof_run('/home', '', '')
+
+    def test_msopst_prof_run2(self):
+        with mock.patch('os.getenv', return_value="/home"):
+            with mock.patch('os.path.exists', return_value=False):
+                report = OpSTReport()
+                advance = AdvanceIniParser(MSOPST_CONF_INI)
+                runner = AclOpRunner('/home', 'ddd', report, advance)
+                runner.prof_run('/home', '', '')
+
+    def test_msopst_prof_get_op_time_from_csv_file_1(self):
+        report = OpSTReport()
+        runner = AclOpRunner('/home', 'ddd', report)
+        runner._prof_get_op_case_info_from_csv_file(None, ["add"])
+        runner._prof_get_op_case_info_from_csv_file("file", None)
+
+
+if __name__ == '__main__':
+    unittest.main()

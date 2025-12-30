@@ -1,0 +1,2 @@
+[info] [00000081]: write spr: name = XXXX, val = 0x00
+[info] [00000081]: write spr: name = PC, val = 0x11ff00

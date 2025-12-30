@@ -1,0 +1,55 @@
+/**
+ * @file testcase.cpp
+ *
+ * -------------------------------------------------------------------------
+ * This file is part of the MindStudio project.
+ * Copyright (c) 2025 Huawei Technologies Co.,Ltd.
+ *
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *
+ *          http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * -------------------------------------------------------------------------
+ */
+
+#include "op_test.h"
+#include "op_execute.h"
+using namespace OpTest;
+
+
+OP_TEST(ResizeBilinearV2, Test_ResizeBilinearV2_001_case_001_NHWC_float)
+{
+    
+    std::string opType = "ResizeBilinearV2";
+    OpTestDesc opTestDesc(opType);
+    // input parameter init
+    opTestDesc.inputShape = {{4, 16, 16, 16}, {2}};
+    opTestDesc.inputDataType = {ACL_FLOAT16, ACL_INT32};
+    opTestDesc.inputFormat = {(aclFormat)1, (aclFormat)1};
+    opTestDesc.inputFilePath = {"test_data/data/Test_ResizeBilinearV2_001_case_001_NHWC_float_input_0", "test_data/data/Test_ResizeBilinearV2_001_case_001_NHWC_float_input_1"};
+    opTestDesc.inputConst = {false, true};
+    // output parameter init
+    opTestDesc.outputShape = {{4, 48, 48, 16}};
+    opTestDesc.outputDataType = {ACL_FLOAT};
+    opTestDesc.outputFormat = {(aclFormat)1};
+    opTestDesc.outputFilePath = {"result_files/Test_ResizeBilinearV2_001_case_001_NHWC_float_output_0"};
+    // attr parameter init
+        OpTestAttr attr0 = {OP_BOOL, "align_corners"};
+    attr0.boolAttr = 0;
+    opTestDesc.opAttrVec.push_back(attr0);
+    OpTestAttr attr1 = {OP_BOOL, "half_pixel_centers"};
+    attr1.boolAttr = 0;
+    opTestDesc.opAttrVec.push_back(attr1);
+
+    // set deviceId
+    const uint32_t deviceId = 0;
+    EXPECT_EQ_AND_RECORD(true, OpExecute(opTestDesc, deviceId), opTestDesc, "Test_ResizeBilinearV2_001_case_001_NHWC_float");
+
+}
+

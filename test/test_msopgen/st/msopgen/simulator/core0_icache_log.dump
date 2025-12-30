@@ -1,0 +1,31 @@
+[info] [00000001]: icache read address is 0x10ce2000, size is 0x00000010, status is MISS
+[info] [00000002]: icache refill request, id is 0x00000003, address is 0x10ce2000
+[info] [00000003]: icache refill request, id is 0x00000004, address is 0x10ce2080
+[info] [00000326]: icache refill acknowledge, id is 0x00000003, address is 0x10ce2000
+[info] [00000327]: icache refill acknowledge, id is 0x00000004, address is 0x10ce2080
+[info] [00000328]: icache read address is 0x10ce2010, size is 0x00000010, status is HIT
+[info] [00000329]: icache read address is 0x10ce2020, size is 0x00000010, status is HIT
+[info] [00000330]: icache read address is 0x10ce2030, size is 0x00000010, status is HIT
+[info] [00000331]: icache read address is 0x10ce2040, size is 0x00000010, status is HIT
+[info] [00000332]: icache read address is 0x10ce2050, size is 0x00000010, status is HIT
+[info] [00000333]: icache read address is 0x10ce2060, size is 0x00000010, status is HIT
+[info] [00000334]: icache read address is 0x10ce2070, size is 0x00000010, status is HIT
+[info] [00000335]: icache read address is 0x10ce2080, size is 0x00000010, status is HIT
+[info] [00000336]: icache read address is 0x10ce2090, size is 0x00000010, status is HIT
+[info] [00000337]: icache read address is 0x10ce20a0, size is 0x00000010, status is HIT
+[info] [00000338]: icache read address is 0x10ce20b0, size is 0x00000010, status is HIT
+[info] [00000339]: icache read address is 0x10ce20c0, size is 0x00000010, status is HIT
+[info] [00000350]: icache read address is 0x10ce20d0, size is 0x00000010, status is HIT
+[info] [00000351]: icache read address is 0x10ce20e0, size is 0x00000010, status is HIT
+[info] [00000352]: icache read address is 0x10ce20f0, size is 0x00000010, status is HIT
+[info] [00000713]: icache read address is 0x10ce2100, size is 0x00000010, status is MISS
+[info] [00000714]: icache refill request, id is 0x0000015c, address is 0x10ce2100
+[info] [00000715]: icache refill request, id is 0x0000015d, address is 0x10ce2180
+[info] [00001038]: icache refill acknowledge, id is 0x0000015c, address is 0x10ce2100
+[info] [00001039]: icache refill acknowledge, id is 0x0000015d, address is 0x10ce2180
+[info] [00001040]: icache read address is 0x10ce2110, size is 0x00000010, status is HIT
+[info] [00001041]: icache read address is 0x10ce2120, size is 0x00000010, status is HIT
+[info] [00001317]: icache read address is 0x10ce2104, size is 0x0000000c, status is HIT
+[info] [00001318]: icache read address is 0x10ce2110, size is 0x00000010, status is HIT
+[info] [00001319]: icache read address is 0x10ce2120, size is 0x00000010, status is HIT
+[info] ++++++++++++++++++++++core: 0, tick: 1321, kernal0 blkID 0 of blkdim 1 done++++++++++++++++++++++.

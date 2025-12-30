@@ -1,0 +1,92 @@
+[
+    {
+        "case_name": "Test_AddAscendC_001",
+        "op": "AddAscendC",
+        "input_desc": [
+            {
+                "format": [
+                    "ND"
+                ],
+                "type": [
+                    "float"
+                ],
+                "shape": [],
+                "data_distribute": [
+                    "uniform"
+                ],
+                "value_range": [
+                    [
+                        0.1,
+                        1.0
+                    ]
+                ],
+                "name": "x"
+            },
+            {
+                "format": [
+                    "ND"
+                ],
+                "type": [
+                    "float"
+                ],
+                "shape": [],
+                "data_distribute": [
+                    "uniform"
+                ],
+                "value_range": [
+                    [
+                        0.1,
+                        1.0
+                    ]
+                ],
+                "name": "y"
+            }
+        ],
+        "output_desc": [
+            {
+                "format": [
+                    "ND"
+                ],
+                "type": [
+                    "float"
+                ],
+                "shape": [],
+                "name": "z"
+            }
+        ],
+        "attr": [
+            {
+                "name": "test",
+                "type": "list_int",
+                "value": null
+            },
+            {
+                "name": "required",
+                "type": "string",
+                "value": null
+            },
+            {
+                "name": "p",
+                "type": "int",
+                "value": 2
+            },
+            {
+                "name": "axes",
+                "type": "list_int",
+                "value": [
+                    1
+                ]
+            },
+            {
+                "name": "keepdim",
+                "type": "bool",
+                "value": false
+            },
+            {
+                "name": "epsilon",
+                "type": "float",
+                "value": 1e-12
+            }
+        ]
+    }
+]
