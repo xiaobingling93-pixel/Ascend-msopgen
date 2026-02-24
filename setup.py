@@ -60,6 +60,7 @@ setup(
         "msopgen": [
             "json_template/*",
             "config/*",
+            "new_op_project_template/**/*"
         ],
     },
     install_requires=[],

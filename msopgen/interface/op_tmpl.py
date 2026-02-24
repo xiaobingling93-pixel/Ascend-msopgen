@@ -590,20 +590,36 @@ def _{name}_aicpu():
     return
     """
 
-    OP_HOST_TILING_DEF_H = """
-#include \"register/tilingdata_base.h\"
+    OP_HOST_TILING_DEF_H = """/* -------------------------------------------------------------------------
+ * This file is part of the MindStudio project.
+ * Copyright (c) 2025 Huawei Technologies Co.,Ltd.
+ *
+ * MindStudio is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *
+ *          http://license.coscl.org.cn/MulanPSL2
+ *
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ * ------------------------------------------------------------------------- */
 
-namespace optiling {{
-BEGIN_TILING_DATA_DEF({op_type}TilingData)
-  TILING_DATA_FIELD_DEF(uint32_t, size);
-END_TILING_DATA_DEF;
 
-REGISTER_TILING_DATA_CLASS({op_type}, {op_type}TilingData)
-}}
+#ifndef {op_type}_TILING_H
+#define {op_type}_TILING_H
+#include <cstdint>
+
+struct {op_name}TilingData {{
+    uint32_t size;
+}};
+
+#endif // {op_type}_TILING_H
 """
 
     OP_HOST_CPP_HEADER = """
-#include \"{op_fix}_tiling.h\"
+#include \"../op_kernel/{op_fix}_tiling.h\"
 #include \"register/op_def_registry.h\"
 
 """
@@ -613,16 +629,15 @@ namespace optiling {{
 static ge::graphStatus TilingFunc(gert::TilingContext* context)
 {{
 
-  {op_type}TilingData tiling;
+  {op_type}TilingData *tiling = context->GetTilingData<{op_type}TilingData>();
   const gert::StorageShape* x1_shape = context->GetInputShape(0);
   int32_t data_sz = 1;
   for (int i = 0; i < x1_shape->GetStorageShape().GetDimNum(); i++)
     data_sz *= x1_shape->GetStorageShape().GetDim(i);
-  tiling.set_size(data_sz);
+  tiling->size = data_sz;
   context->SetBlockDim(8);
-  tiling.SaveToBuffer(context->GetRawTilingData()->GetData(), context->GetRawTilingData()->GetCapacity());
-  context->GetRawTilingData()->SetDataSize(tiling.GetDataSize());
-
+  size_t *currentWorkspace = context->GetWorkspaceSizes(1);
+  currentWorkspace[0] = 0;
   return ge::GRAPH_SUCCESS;
 }}
 }}
@@ -640,9 +655,9 @@ static ge::graphStatus InferShape(gert::InferShapeContext* context)
 }
 static ge::graphStatus InferDataType(gert::InferDataTypeContext *context)
 {
-const auto inputDataType = context->GetInputDataType(0);
-context->SetOutputDataType(0, inputDataType);
-return ge::GRAPH_SUCCESS;
+    const auto inputDataType = context->GetInputDataType(0);
+    context->SetOutputDataType(0, inputDataType);
+    return ge::GRAPH_SUCCESS;
 }
 }
 

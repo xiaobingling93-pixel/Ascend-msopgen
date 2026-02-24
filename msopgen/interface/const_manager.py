@@ -70,28 +70,24 @@ class ConstManager:
     FMK_MS = ["ms", "mindspore"]
     FMK_LIST = ["tf", "tensorflow", "caffe", "pytorch", "ms", "mindspore", "onnx", "aclnn"]
     PROJ_MS_NAME = "mindspore"
-    FMK_ACLNN = "aclnn"
     GEN_MODE_LIST = ['0', '1']
     MS_PROTO_PATH = "op_proto"
-    
-    OP_ASCENDC_CMAKE_PATH_LINUX = "./cmake/util/makeself"
+
     OP_TEMPLATE_PATH_LINUX = "tools/op_project_templates/op_project_tmpl"
     OP_TEMPLATE_TBE_PATH_LINUX = "tools/op_project_templates/tbe"
     OP_TEMPLATE_AICPU_PATH_LINUX = "tools/op_project_templates/cpukernel"
-    OP_TEMPLATE_ASCENDC_PATH_LINUX = "tools/op_project_templates/ascendc/customize"
-    OP_TEMPLATE_ASCENDC_ACLNN_PATH_LINUX = "tools/op_project_templates/ascendc/aclnn"
-    OP_ASCENDC_CMAKE_MAKESELF_PATH_LINUX = "../customize/cmake/util/makeself"
+    OP_TEMPLATE_ASCENDC_PATH_LINUX = "./new_op_project_template/custom_op"
 
-    OP_ASCENDC_CMAKE_PATH_WINDOWS = r".\cmake\util\makeself"
     OP_TEMPLATE_PATH_WINDOWS = r".\op_project_templates\op_project_tmpl"
     OP_TEMPLATE_TBE_PATH_WINDOWS = r".\op_project_templates\tbe"
     OP_TEMPLATE_AICPU_PATH_WINDOWS = r".\op_project_templates\cpukernel"
-    OP_TEMPLATE_ASCENDC_PATH_WINDOWS = r".\op_project_templates\ascendc\customize"
-    OP_TEMPLATE_ASCENDC_ACLNN_PATH_WINDOWS = r".\op_project_templates\ascendc\aclnn"
-    OP_ASCENDC_CMAKE_MAKESELF_PATH_WINDOWS = r".\..\customize\cmake\util\makeself"
 
-    OP_ASCENDC_CMAKE_PATH = (OP_ASCENDC_CMAKE_PATH_WINDOWS if platform.system() == 'Windows' 
-                             else OP_ASCENDC_CMAKE_PATH_LINUX)
+    OP_TEMPLATE_ASCENDC_PATH_WINDOWS = r".\new_op_project_template\custom_op"
+
+    FRAMEWORK_TF_PLUGIN = "tf_plugin"
+    FRAMEWORK_ONNX_PLUGIN = "onnx_plugin"
+    FRAMEWORK_CAFFE_PLUGIN = "caffe_plugin"
+
     OP_TEMPLATE_PATH = (OP_TEMPLATE_PATH_WINDOWS if platform.system() == 'Windows' 
                         else OP_TEMPLATE_PATH_LINUX)
     OP_TEMPLATE_TBE_PATH = (OP_TEMPLATE_TBE_PATH_WINDOWS if platform.system() == 'Windows' 
@@ -100,10 +96,6 @@ class ConstManager:
                               else OP_TEMPLATE_AICPU_PATH_LINUX)
     OP_TEMPLATE_ASCENDC_PATH = (OP_TEMPLATE_ASCENDC_PATH_WINDOWS if platform.system() == 'Windows' 
                                 else OP_TEMPLATE_ASCENDC_PATH_LINUX)
-    OP_TEMPLATE_ASCENDC_ACLNN_PATH = (OP_TEMPLATE_ASCENDC_ACLNN_PATH_WINDOWS if platform.system() == 'Windows' 
-                                      else OP_TEMPLATE_ASCENDC_ACLNN_PATH_LINUX)
-    OP_ASCENDC_CMAKE_MAKESELF_PATH = (OP_ASCENDC_CMAKE_MAKESELF_PATH_WINDOWS if platform.system() == 'Windows'
-                                       else OP_ASCENDC_CMAKE_MAKESELF_PATH_LINUX)
 
 
     SPACE = ' '

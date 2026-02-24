@@ -14,18 +14,13 @@
  * See the Mulan PSL v2 for more details.
  * ------------------------------------------------------------------------- */
 
-#ifndef GE_OP_CONV2_D_TIK_H
-#define GE_OP_CONV2_D_TIK_H
-#include "graph/operator_reg.h"
-namespace ge {
 
-REG_OP(Conv2DTik)
-    .INPUT(x1, TensorType({DT_FLOAT,DT_FLOAT16}))
-    .INPUT(x2, TensorType({DT_FLOAT,DT_FLOAT16}))
-    .OUTPUT(y, TensorType({DT_FLOAT,DT_FLOAT16}))
-    .ATTR(strides, ListInt, [1,1,1,1])
-    .ATTR(pads, ListInt, [1,1,1,1])
-    .ATTR(dilations, ListInt, [1,1,1,1])
-    .OP_END_FACTORY_REG(Conv2DTik)
-}
-#endif //GE_OP_CONV2_D_TIK_H
+#ifndef CONV2_D_TILING_H
+#define CONV2_D_TILING_H
+#include <cstdint>
+
+struct Conv2DTilingData {
+    uint32_t size;
+};
+
+#endif // CONV2_D_TILING_H

@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
+import shutil
 import subprocess
 import logging
 import argparse
 import sys
 import glob
+from pathlib import Path
+from download_dependencies import update_submodule
 
 
 def exec_cmd(cmd):
@@ -30,12 +33,36 @@ def create_arg_parser():
                         help="Build with specific revision or tag")
     return parser
 
+def update_symlink(dst_path, src_path):
+    src_path = Path(src_path)
+    dst_path = Path(dst_path)
+
+    if dst_path.is_symlink():
+        dst_path.unlink()
+    elif dst_path.exists():
+        shutil.rmtree(dst_path)
+
+    dst_path.absolute().parent.mkdir(parents=True, exist_ok=True)
+    dst_path.symlink_to(src_path.absolute(), target_is_directory=True)
+
+def add_link_to_asc_tools_template():
+    asc_tools_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "thirdparty", "asc-tools",
+                                                 "utils", "templates", "new_op_project_template"))
+    asc_tools_install_dir = os.path.join(os.path.dirname(__file__), "msopgen", "new_op_project_template")
+    update_symlink(asc_tools_install_dir, asc_tools_dir)
+
 
 if __name__ == '__main__':
     parser = create_arg_parser()
     args = parser.parse_args()
     current_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
     os.chdir(current_dir)
+    # 解析入参是否为local，非local场景时按需更新代码；local场景不更新代码只使用本地代码
+    if 'local' not in args.command:
+        # update submodule
+        update_submodule(args)
+    # 获取编译文件
+    add_link_to_asc_tools_template()
     if args.command == 'test':
         run_tests()
     else:

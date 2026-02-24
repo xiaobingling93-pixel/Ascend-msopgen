@@ -137,6 +137,7 @@ class OpFileAiCore(OPFile):
         Return Value:
         """
         cpp_list = ['#include "kernel_operator.h"']
+        cpp_list.append('#include "' + self.op_info.fix_op_type +  '_tiling.h"')
         cpp_list.append('')
         kern_args = []
         for op_input in list(self.op_info.parsed_input_info):
@@ -151,7 +152,8 @@ class OpFileAiCore(OPFile):
         arg_list = ', '.join(kern_args)
         cpp_list.append('extern "C" __global__ __aicore__ void {}({}) {{'.format(
             self.op_info.fix_op_type, arg_list))
-        cpp_list.append('    GET_TILING_DATA(tiling_data, tiling);')
+        cpp_list.append('    REGISTER_TILING_DEFAULT({}TilingData);'.format(self.op_info.op_type))
+        cpp_list.append('    GET_TILING_DATA(tilingData, tiling);')
         cpp_list.append('    // TODO: user kernel impl')
         cpp_list.append('}')
         # create py_dir
@@ -357,11 +359,11 @@ class OpFileAiCore(OPFile):
             utils.write_files(info_path, new_str)
 
     def _generate_cpp_tiling(self: any) -> None:
-        th_path = os.path.join(self.output_path, ConstManager.CPP_HOST_DIR)
+        th_path = os.path.join(self.output_path, ConstManager.CPP_KERNEL_DIR)
         th_file = os.path.join(th_path, self.op_info.fix_op_type + "_tiling.h")
         utils.make_dirs(th_path)
         utils.write_files(th_file, OPTmpl.OP_HOST_TILING_DEF_H.format(
-                          op_type=self.op_info.op_type))
+                          op_type=self.op_info.fix_op_type.upper(), op_name=self.op_info.op_type ))
 
     def _generate_cpp_params(self: any, is_output: bool) -> str:
         param_str = ""
@@ -447,12 +449,25 @@ class OpFileAiCore(OPFile):
                     config_content,
                     flags=re.IGNORECASE)
 
+    def _update_ascendc_op_kernel_cmake(self: any) -> None:
+        cmake_file_path = os.path.join(self.output_path, ConstManager.KERNEL_CMAKELISTS_FILE)
+        if not os.path.exists(cmake_file_path):
+            utils.print_error_log(
+                "Get template file path %s failed." % cmake_file_path
+            )
+            raise utils.MsOpGenException(
+                ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
+        cmake_str = utils.read_file(cmake_file_path)
+        cmake_update_value = cmake_str.format(op_name=self.op_info.op_type,
+                                              compute_unit=self.input_soc_version,
+                                              kernel_name=self.op_info.fix_op_type)
+        utils.write_files(cmake_file_path, cmake_update_value)
+        return
+
+
     def _check_config_cmake_env(self: any, content: str, config_env: dict, config_type: str) -> None:
         check_list = ["ASCEND_COMPUTE_UNIT"]
-        if config_type == "aclnn":
-            check_list.append("ASCEND_CANN_PACKAGE_PATH")
-        else:
-            check_list.append("ASCEND_FRAMEWORK_TYPE")
+        check_list.append("ASCEND_FRAMEWORK_TYPE")
         for env in check_list:
             if env in content:
                 check_list.remove(env)
@@ -460,26 +475,7 @@ class OpFileAiCore(OPFile):
             res = ", ".join(check_list)
             utils.print_warn_log("File config.cmake lack of {}. Please check your config env.".format(res))
 
-    def _update_aclnn_config_cmake(self: any, dst_path, config_env: dict) -> None:
-        config_path = os.path.join(ConstManager.CANN_HOME_PATH,
-                                    ConstManager.OP_TEMPLATE_ASCENDC_ACLNN_PATH,
-                                    'cmake/config.cmake')
-        template_config = utils.read_file(config_path)
-        self._check_config_cmake_env(template_config, config_env, "aclnn")
-        utils.write_files(dst_path, self._update_config_cmake(template_config, config_env))
-
-    def _update_customize_config_cmake(self: any, dst_path, config_env: dict) -> None:
-        config_path = os.path.join(ConstManager.CANN_HOME_PATH,
-                                    ConstManager.OP_TEMPLATE_ASCENDC_PATH,
-                                    'cmake/config.cmake')
-        template_config = utils.read_file(config_path)
-        self._check_config_cmake_env(template_config, config_env, "customize")
-        utils.write_files(dst_path, self._update_config_cmake(template_config, config_env))
-
-    def _generate_cmake_config_cpp(self: any) -> None:
-        cfg_path = os.path.join(self.output_path, ConstManager.CMAKE_CONFIG_DIR)
-        cfg_file = os.path.join(cfg_path, "config.cmake")
-        utils.make_dirs(cfg_path)
+    def _update_cmake_config_cpp(self: any) -> None:
         socs = []
         for compute_unit in self.compute_unit:
             units = compute_unit.split("-", 1)
@@ -487,25 +483,8 @@ class OpFileAiCore(OPFile):
                 continue
             if units[0] != "ai_core":
                 continue
-            socs.append(units[1])
+            socs.append(utils.CheckFromConfig().trans_soc_version(units[1]))
         soc = ";".join(socs)
-        plugin = self.fmk_type
-        if plugin == "tf":
-            plugin = "tensorflow"
-        config_env = {
-            'ASCEND_COMPUTE_UNIT': utils.CheckFromConfig().trans_soc_version(soc),
-            'ASCEND_FRAMEWORK_TYPE': plugin
-        }
-
-        if plugin == "aclnn":
-            cann_path = os.getenv(ConstManager.ASCEND_HOME_PATH)
-            if not cann_path:
-                cann_path = ConstManager.CANN_USR_LOCAL_PATH
-            config_env['ASCEND_CANN_PACKAGE_PATH'] = cann_path
-            self._update_aclnn_config_cmake(cfg_file, config_env)
-            return
-            
-        self._update_customize_config_cmake(cfg_file, config_env)
         # modify CMakePreset.json soc version
         json_file = os.path.join(self.output_path, ConstManager.CMAKE_PRESET_FILE)
         preset_json_data = utils.read_json_file(json_file)
@@ -515,8 +494,7 @@ class OpFileAiCore(OPFile):
             preset_value = "value"
             for preset in preset_json_data['configurePresets']:
                 if preset.get(cache_variables).get('ASCEND_COMPUTE_UNIT').get(preset_value) is not None:
-                    preset[cache_variables]['ASCEND_COMPUTE_UNIT'][preset_value] = \
-                        utils.CheckFromConfig().trans_soc_version(soc)
+                    preset[cache_variables]['ASCEND_COMPUTE_UNIT'][preset_value] = soc
                 if preset.get(cache_variables).get('ASCEND_CANN_PACKAGE_PATH').get(preset_value) is not None:
                     preset[cache_variables]['ASCEND_CANN_PACKAGE_PATH'][preset_value] = \
                         cann_install_path
@@ -527,25 +505,14 @@ class OpFileAiCore(OPFile):
             json.dump(preset_json_data, file, indent=4)
         return
 
-    def _generate_aclnn_op_kernel_cmakelist(self: any):
-        cmake_file_path = os.path.join(self.output_path, ConstManager.KERNEL_CMAKELISTS_FILE)
-        utils.write_files(cmake_file_path, OPTmpl.CMAKE_KERNEL_CMAKELISTS_FILE.format(
-            op_name=self.op_info.op_type, kernel_name=self.op_info.fix_op_type))
-
-    def _file_enable_edit_cpp(self: any) -> None:
-        if self.fmk_type != "aclnn":
-            os.chmod(os.path.join(self.output_path, ConstManager.CMAKE_PRESET_FILE), ConstManager.CONFIG_MODE)
-
     def _new_operator(self: any) -> None:
         if self.op_lan == ConstManager.OP_LAN_CPP:
-            self._generate_cmake_config_cpp()
+            self._update_cmake_config_cpp()
+            # self._update_ascendc_op_kernel_cmake()
             self._generate_op_host()
-            self._file_enable_edit_cpp()
         else:
             self._generate_cmake_lists()
             self.generate_info_cfg()
             self._generate_op_proto()
         self.generate_impl()
         self._generate_plugin()
-        if self.fmk_type == "aclnn":
-            self._generate_aclnn_op_kernel_cmakelist()

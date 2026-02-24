@@ -1,0 +1,4 @@
+[submodule "thirdparty/asc-tools"]
+	path = thirdparty/asc-tools
+	url = https://gitcode.com/cann/asc-tools.git
+	branch = master

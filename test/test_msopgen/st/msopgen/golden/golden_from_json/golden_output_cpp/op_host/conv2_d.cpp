@@ -1,5 +1,5 @@
 
-#include "conv2_d_tiling.h"
+#include "../op_kernel/conv2_d_tiling.h"
 #include "register/op_def_registry.h"
 
 
@@ -7,16 +7,15 @@ namespace optiling {
 static ge::graphStatus TilingFunc(gert::TilingContext* context)
 {
 
-  Conv2DTilingData tiling;
+  Conv2DTilingData *tiling = context->GetTilingData<Conv2DTilingData>();
   const gert::StorageShape* x1_shape = context->GetInputShape(0);
   int32_t data_sz = 1;
   for (int i = 0; i < x1_shape->GetStorageShape().GetDimNum(); i++)
     data_sz *= x1_shape->GetStorageShape().GetDim(i);
-  tiling.set_size(data_sz);
+  tiling->size = data_sz;
   context->SetBlockDim(8);
-  tiling.SaveToBuffer(context->GetRawTilingData()->GetData(), context->GetRawTilingData()->GetCapacity());
-  context->GetRawTilingData()->SetDataSize(tiling.GetDataSize());
-
+  size_t *currentWorkspace = context->GetWorkspaceSizes(1);
+  currentWorkspace[0] = 0;
   return ge::GRAPH_SUCCESS;
 }
 }
@@ -32,9 +31,9 @@ static ge::graphStatus InferShape(gert::InferShapeContext* context)
 }
 static ge::graphStatus InferDataType(gert::InferDataTypeContext *context)
 {
-const auto inputDataType = context->GetInputDataType(0);
-context->SetOutputDataType(0, inputDataType);
-return ge::GRAPH_SUCCESS;
+    const auto inputDataType = context->GetInputDataType(0);
+    context->SetOutputDataType(0, inputDataType);
+    return ge::GRAPH_SUCCESS;
 }
 }
 

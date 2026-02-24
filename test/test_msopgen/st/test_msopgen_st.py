@@ -32,7 +32,6 @@ IR_EXCEL_PATH = os.path.join(base_dir, 'res/IR_excel.xlsx')
 
 IR_JSON_GOLDEN_OUTPUT = os.path.join(base_dir, 'msopgen/golden/golden_from_json/golden_output')
 IR_JSON_GOLDEN_OUTPUT_CPP = os.path.join(base_dir, 'msopgen/golden/golden_from_json/golden_output_cpp')
-IR_JSON_GOLDEN_OUTPUT_ACLNN_CPP = os.path.join(base_dir, 'msopgen/golden/golden_from_json/golden_output_aclnn_cpp')
 IR_JSON_OUTPUT = os.path.join(base_dir, 'msopgen/golden/golden_from_json/output')
 
 MS_JSON_GOLDEN_OUTPUT = os.path.join(base_dir, 'msopgen/golden/golden_from_ms_json/golden_output')
@@ -262,16 +261,6 @@ class TestUtilsMethods(unittest.TestCase):
 
         self.assertTrue(test_utils.check_result(IR_JSON_OUTPUT,
                                                 IR_JSON_GOLDEN_OUTPUT_CPP))
-
-    def test_gen_aclnn_cpp_from_ir_json_compare_success(self):
-        test_utils.clear_out_path(IR_JSON_OUTPUT)
-        args = ['msopgen', 'gen', '-i', IR_JSON_PATH, '-f', 'aclnn', '-c',
-                'ai_core-ascend310', '-op', 'Conv2D', '-lan', 'cpp', '-out', IR_JSON_OUTPUT]
-        with pytest.raises(SystemExit):
-            with mock.patch('sys.argv', args):
-                msopgen.main()
-        self.assertTrue(test_utils.check_result(IR_JSON_OUTPUT,
-                                                IR_JSON_GOLDEN_OUTPUT_ACLNN_CPP))
 
     def test_arg_parser_expection_1(self):
         argument1 = ['msopgen']

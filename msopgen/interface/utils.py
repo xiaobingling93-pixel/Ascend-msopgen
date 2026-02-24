@@ -679,26 +679,6 @@ def check_execute_file(file_path):
     return True
 
 
-def modify_build_sh(directory_path):
-    build_sh_path = os.path.join(directory_path, 'build.sh')
-    if not os.path.isfile(build_sh_path):
-        raise FileNotFoundError(f"{build_sh_path} not found.")
-    with os.fdopen(os.open(build_sh_path, ConstManager.RDWR_FLAGS, ConstManager.FILE_AUTHORITY), 'w+',
-                   encoding='utf-8') as file:
-        lines = file.readlines()
-        if len(lines) <= 1:
-            raise ValueError(f"{build_sh_path} is empty.")
-        file.seek(0)
-        new_content = ConstManager.MODIFY_BUILD
-        for line in lines[1:]:
-            line = line.rstrip()
-            if "cmake .." in line:
-                line = line + ' -DASCEND_CANN_PACKAGE_PATH=${ASCEND_HOME_PATH}'
-            new_content += line + '\n'
-        file.write(new_content)
-    os.chmod(build_sh_path, ConstManager.EXECUTABLE_MODE)
-
-
 def to_safe_string(input_string: str):
     invalid_character = {
         "\n": "\\n", "\f": "\\f", "\r": "\\r", "\b": "\\b", "\t": "\\t", "\v": "\\v",

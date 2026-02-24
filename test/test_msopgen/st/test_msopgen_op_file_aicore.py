@@ -7,17 +7,18 @@ from msopgen.interface.op_file_aicore import OpFileAiCore
 
 
 class OpInfo:
-    def __init__(self, parsed_info_input, parsed_info_output, fix_op_type_in):
+    def __init__(self, parsed_info_input, parsed_info_output, fix_op_type_in, op_type_in):
         self.parsed_input_info = parsed_info_input
         self.parsed_output_info = parsed_info_output
         self.fix_op_type = fix_op_type_in
+        self.op_type = op_type_in
 
 
 class TestOpFileAiCoreMethods(unittest.TestCase):
 
     def __init__(self, method_name='runTest'):
         super(TestOpFileAiCoreMethods, self).__init__(method_name)
-        self.op_info = OpInfo('', '', '')
+        self.op_info = OpInfo('', '', '', '')
         self.output_path = ''
 
     def test_generate_input_output_info_cfg(self):

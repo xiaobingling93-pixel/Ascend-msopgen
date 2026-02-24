@@ -20,6 +20,7 @@ This file mainly involves base class for operator files.
 # -------------------------------------------------------------------------
 """
 import os
+import shutil
 import platform
 from abc import ABCMeta
 from abc import abstractmethod
@@ -98,9 +99,6 @@ class OPFile(metaclass=ABCMeta):
 
     def _generate_caffe_plugin_cmake_list(self: any, plugin_dir: str) -> None:
         # create and write
-        if self.op_lan == ConstManager.OP_LAN_CPP:
-            self._generate_plugin_cppcmake(plugin_dir, "caffe", "caffe")
-            return
         cmake_list_path = os.path.join(plugin_dir, "CMakeLists.txt")
         if os.path.exists(cmake_list_path):
             return
@@ -110,7 +108,6 @@ class OPFile(metaclass=ABCMeta):
     def _generate_tf_plugin_cmake_list(self: any, plugin_dir: str) -> None:
         # create and write
         if self.op_lan == ConstManager.OP_LAN_CPP:
-            self._generate_plugin_cppcmake(plugin_dir, "tf", "tensorflow")
             return
         cmake_list_path = os.path.join(plugin_dir, "CMakeLists.txt")
         if os.path.exists(cmake_list_path):
@@ -119,37 +116,46 @@ class OPFile(metaclass=ABCMeta):
         utils.write_files(cmake_list_path, OPTmpl.PLUGIN_CMAKLIST)
 
     def _generate_project(self: any) -> None:
-        aclnn_flag_bool = False
         if self.op_lan == ConstManager.OP_LAN_CPP:
-            if self.fmk_type == ConstManager.FMK_ACLNN:
-                aclnn_flag_bool = True
-                temp_sub_path = ConstManager.OP_TEMPLATE_ASCENDC_ACLNN_PATH
-            else:
-                temp_sub_path = ConstManager.OP_TEMPLATE_ASCENDC_PATH
+            current_path = os.path.realpath(__file__)
+            asc_template_path = os.path.join(
+                os.path.realpath(os.path.dirname(current_path) + os.path.sep + ".."),
+                                 ConstManager.OP_TEMPLATE_ASCENDC_PATH)
+            utils.copy_template(asc_template_path, self.output_path)
+            tf_plugin_dir = os.path.join(self.output_path, "framework", ConstManager.FRAMEWORK_TF_PLUGIN)
+            onnx_plugin_dir = os.path.join(self.output_path, "framework", ConstManager.FRAMEWORK_ONNX_PLUGIN)
+            framework_dir = os.path.join(self.output_path, "framework")
+            if self.fmk_type == "tensorflow" or self.fmk_type == "tf":
+                if os.path.exists(onnx_plugin_dir):
+                    shutil.rmtree(onnx_plugin_dir)
+            elif self.fmk_type == "onnx":
+                if os.path.exists(tf_plugin_dir):
+                    shutil.rmtree(tf_plugin_dir)
+            elif self.fmk_type == "pytorch" or self.fmk_type == "caffe" or self.fmk_type == "aclnn":
+                if os.path.exists(framework_dir):
+                    shutil.rmtree(framework_dir)
+                if self.fmk_type == "aclnn":
+                    utils.print_warn_log("User used the \"aclnn\" parameter to generate an AscendC template "
+                                         "project via the tool; this feature will be deprecated in future releases.")
+
         else:
             temp_sub_path = ConstManager.OP_TEMPLATE_PATH
-        cann_install_path = ConstManager.CANN_HOME_PATH
-        if not os.path.exists(cann_install_path):
-            utils.print_error_log(
-                "Get cann install path failed. Please check if your cann-toolkit is installed and envs."
-            )
-            raise utils.MsOpGenException(
-                ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
-        template_path = os.path.join(
-            cann_install_path, temp_sub_path)
-        if not os.path.exists(template_path):
-            utils.print_error_log(
-                "Get template file path failed. Please check if your cann-toolkit is installed and envs."
-            )
-            raise utils.MsOpGenException(
-                ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
-        utils.copy_template(template_path, self.output_path)
-        if self.op_lan == ConstManager.OP_LAN_CPP and self.fmk_type != ConstManager.FMK_ACLNN:
-            utils.modify_build_sh(self.output_path)
-        if aclnn_flag_bool:
-            temp_src_makeself_path = os.path.join(template_path, ConstManager.OP_ASCENDC_CMAKE_MAKESELF_PATH)
-            temp_dist_makeself_path = os.path.join(self.output_path, ConstManager.OP_ASCENDC_CMAKE_PATH)
-            utils.copy_template(temp_src_makeself_path, temp_dist_makeself_path)
+            cann_install_path = ConstManager.CANN_HOME_PATH
+            if not os.path.exists(cann_install_path):
+                utils.print_error_log(
+                    "Get cann install path failed. Please check if your cann-toolkit is installed and envs."
+                )
+                raise utils.MsOpGenException(
+                    ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
+            template_path = os.path.join(
+                cann_install_path, temp_sub_path)
+            if not os.path.exists(template_path):
+                utils.print_error_log(
+                    "Get template file path failed. Please check if your cann-toolkit is installed and envs."
+                )
+                raise utils.MsOpGenException(
+                    ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
+            utils.copy_template(template_path, self.output_path)
         self._new_operator()
 
     def _new_operator(self: any) -> None:
@@ -164,6 +170,8 @@ class OPFile(metaclass=ABCMeta):
                                  "plugin files. Please check.")
             return
         if self.fmk_type == "caffe":
+            if self.op_lan == ConstManager.OP_LAN_CPP:
+                return
             plugin_dir = os.path.join(self.output_path, 'framework',
                                       'caffe_plugin')
             self._generate_caffe_plugin_cpp(plugin_dir, "caffe")
@@ -185,6 +193,8 @@ class OPFile(metaclass=ABCMeta):
 
     def _generate_onnx_plugin_cmake_list(self: any, plugin_dir: str) -> None:
         # create and write
+        if self.op_lan == ConstManager.OP_LAN_CPP:
+            return
         if self.mode == ConstManager.GEN_PROJECT:
             if self.op_lan == ConstManager.OP_LAN_CPP:
                 self._generate_plugin_cppcmake(plugin_dir, "onnx", "onnx")

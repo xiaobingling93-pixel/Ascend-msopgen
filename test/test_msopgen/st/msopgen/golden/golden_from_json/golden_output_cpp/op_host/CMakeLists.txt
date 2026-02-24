@@ -1,83 +1,57 @@
+# ----------------------------------------------------------------------------------------------------------
+# Copyright (c) 2025 Huawei Technologies Co., Ltd.
+# This program is free software, you can redistribute it and/or modify it under the terms and conditions of
+# CANN Open Software License Agreement Version 2.0 (the "License").
+# Please refer to the License for details. You may not use this file except in compliance with the License.
+# THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+# See LICENSE in the root of the software repository for the full text of the License.
+# ----------------------------------------------------------------------------------------------------------
+
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} ops_srcs)
-
-opbuild(OPS_SRC ${ops_srcs}
-        OUT_DIR ${ASCEND_AUTOGEN_PATH}
+npu_op_code_gen(
+    SRC ${ops_srcs}
+    PACKAGE ${package_name}
+    OUT_DIR ${ASCEND_AUTOGEN_PATH}
 )
 
-add_library(cust_op_proto SHARED ${ops_srcs} ${ASCEND_AUTOGEN_PATH}/op_proto.cc)
-target_compile_definitions(cust_op_proto PRIVATE OP_PROTO_LIB)
+file(GLOB autogen_aclnn_src ${ASCEND_AUTOGEN_PATH}/aclnn_*.cpp)
+set_source_files_properties(${autogen_aclnn_src} PROPERTIES GENERATED TRUE)
+npu_op_library(cust_opapi ACLNN
+    ${autogen_aclnn_src}
+)
+
+target_compile_options(cust_opapi PRIVATE
+    -fvisibility=hidden
+)
+
+file(GLOB group_proto_src ${ASCEND_AUTOGEN_PATH}/group_op_proto/*.cc)
+file(GLOB proto_src ${ASCEND_AUTOGEN_PATH}/op_proto.cc)
+set_source_files_properties(${group_proto_src} PROPERTIES GENERATED TRUE)
+set_source_files_properties(${proto_src} PROPERTIES GENERATED TRUE)
+npu_op_library(cust_op_proto GRAPH
+    ${ops_srcs}
+    ${group_proto_src}
+    ${proto_src}
+)
 target_compile_options(cust_op_proto PRIVATE
-        -fvisibility=hidden
-)
-if(ENABLE_CROSS_COMPILE)
-    target_link_directories(cust_op_proto PRIVATE
-                            ${CMAKE_COMPILE_COMPILER_LIBRARY}
-                            ${CMAKE_COMPILE_RUNTIME_LIBRARY}
-    )
-endif()
-target_link_libraries(cust_op_proto PRIVATE
-        intf_pub
-        exe_graph
-        register
-        tiling_api
-        -Wl,--whole-archive
-        rt2_registry
-        -Wl,--no-whole-archive
-)
-set_target_properties(cust_op_proto PROPERTIES OUTPUT_NAME
-                      cust_opsproto_rt2.0
-)
-add_library(cust_optiling SHARED ${ops_srcs})
-target_compile_definitions(cust_optiling PRIVATE OP_TILING_LIB)
-target_compile_options(cust_optiling PRIVATE
-        -fvisibility=hidden
-)
-if(ENABLE_CROSS_COMPILE)
-    target_link_directories(cust_optiling PRIVATE
-                            ${CMAKE_COMPILE_COMPILER_LIBRARY}
-                            ${CMAKE_COMPILE_RUNTIME_LIBRARY}
-    )
-endif()
-
-target_link_libraries(cust_optiling PRIVATE
-        intf_pub
-        exe_graph
-        register
-        tiling_api
-        -Wl,--whole-archive
-        rt2_registry
-        -Wl,--no-whole-archive
-)
-set_target_properties(cust_optiling PROPERTIES OUTPUT_NAME
-                      cust_opmaster_rt2.0
+    -fvisibility=hidden
 )
 
-file(GLOB aclnn_src ${ASCEND_AUTOGEN_PATH}/aclnn_*.cpp)
-file(GLOB aclnn_inc ${ASCEND_AUTOGEN_PATH}/aclnn_*.h)
-add_library(cust_opapi SHARED ${aclnn_src})
-if(ENABLE_CROSS_COMPILE)
-    target_link_directories(cust_opapi PRIVATE
-                            ${CMAKE_COMPILE_COMPILER_LIBRARY}
-                            ${CMAKE_COMPILE_RUNTIME_LIBRARY}
-    )
-endif()
-target_link_libraries(cust_opapi PRIVATE intf_pub ascendcl nnopbase)
-
-add_custom_target(optiling_compat ALL
-                  COMMAND ln -sf lib/linux/${CMAKE_SYSTEM_PROCESSOR}/$<TARGET_FILE_NAME:cust_optiling>
-                          ${CMAKE_CURRENT_BINARY_DIR}/liboptiling.so
+file(GLOB fallback_src ${ASCEND_AUTOGEN_PATH}/fallback_*.cpp)
+set_source_files_properties(${fallback_src} PROPERTIES GENERATED TRUE)
+npu_op_library(cust_optiling TILING
+    ${ops_srcs}
+    ${fallback_src}
+)
+target_compile_options(cust_op_proto PRIVATE
+    -fvisibility=hidden
 )
 
-install(TARGETS cust_op_proto
-        LIBRARY DESTINATION packages/vendors/${vendor_name}/op_proto/lib/linux/${CMAKE_SYSTEM_PROCESSOR})
-install(FILES ${ASCEND_AUTOGEN_PATH}/op_proto.h
-        DESTINATION packages/vendors/${vendor_name}/op_proto/inc)
-install(TARGETS cust_optiling
-        LIBRARY DESTINATION packages/vendors/${vendor_name}/op_impl/ai_core/tbe/op_tiling/lib/linux/${CMAKE_SYSTEM_PROCESSOR})
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/liboptiling.so
-        DESTINATION packages/vendors/${vendor_name}/op_impl/ai_core/tbe/op_tiling)
-install(TARGETS cust_opapi
-        LIBRARY DESTINATION packages/vendors/${vendor_name}/op_api/lib)
-install(FILES ${aclnn_inc}
-        DESTINATION packages/vendors/${vendor_name}/op_api/include)
+npu_op_package_add(${package_name}
+    LIBRARY
+        cust_optiling
+        cust_opapi
+        cust_op_proto
+)
