@@ -79,21 +79,16 @@
     ```tex
     MatmulCustom/
     ├── build.sh         // 编译入口脚本
-    ├── cmake 
-    │   ├── xx.cmake
-    │   ├── ....
-    │   ├── util        // 算子工程编译所需脚本及公共编译文件存放目录
     ├── CMakeLists.txt   // 算子工程的CMakeLists.txt
     ├── CMakePresets.json // 编译配置项
     ├── framework        // 算子插件实现文件目录，单算子模型文件的生成不依赖算子适配插件，无需关注
     ├── op_host                      // Host侧实现文件
-    │   ├── matmul_custom_tiling.h    // 算子tiling定义文件
     │   ├── matmul_custom.cpp         // 算子原型注册、shape推导、信息库、tiling实现等内容文件
     │   ├── CMakeLists.txt
     ├── op_kernel                   // Kernel侧实现文件
     │   ├── CMakeLists.txt   
     │   ├── matmul_custom.cpp        // 算子代码实现文件 
-    ├── scripts                     // 自定义算子工程打包相关脚本所在目录
+    │   ├── matmul_custom_tiling.h    // 算子tiling定义文件
     ```
 
 4. 执行算子工程编译。
