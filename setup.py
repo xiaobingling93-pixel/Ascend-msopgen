@@ -24,7 +24,7 @@ import os
 import stat
 import shutil
 from setuptools import setup
-from build import add_link_to_asc_tools_template
+from pathlib import Path
 
 os.environ['SOURCE_DATE_EPOCH'] = str(int(os.path.getctime(os.path.realpath(__file__))))
 currentDir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
@@ -37,8 +37,27 @@ shutil.copy(src, dst)
 st = os.stat(dst)
 os.chmod(dst, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-# 创建 msopgen 生成功能所依赖的模板文件
-add_link_to_asc_tools_template()
+def update_symlink(dst_path, src_path):
+    src_path = Path(src_path)
+    dst_path = Path(dst_path)
+
+    if dst_path.is_symlink():
+        dst_path.unlink()
+    elif dst_path.exists():
+        shutil.rmtree(dst_path)
+
+    dst_path.absolute().parent.mkdir(parents=True, exist_ok=True)
+    dst_path.symlink_to(src_path.absolute(), target_is_directory=True)
+
+
+def link_asc_tools_template():
+    project_root = Path(__file__).resolve().parent
+    asc_tools_dir = project_root / "thirdparty" / "asc-tools" / "utils" / "templates" / \
+                    "new_op_project_template"
+    install_dir = project_root / "msopgen" / "new_op_project_template"
+    update_symlink(install_dir, asc_tools_dir)
+
+link_asc_tools_template()
 
 setup_kwargs = {
     "include_package_data": True
