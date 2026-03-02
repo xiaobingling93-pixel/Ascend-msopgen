@@ -24,6 +24,7 @@ import os
 import stat
 import shutil
 from setuptools import setup
+from build import add_link_to_asc_tools_template
 
 os.environ['SOURCE_DATE_EPOCH'] = str(int(os.path.getctime(os.path.realpath(__file__))))
 currentDir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
@@ -36,6 +37,9 @@ shutil.copy(src, dst)
 st = os.stat(dst)
 os.chmod(dst, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
+# 创建 msopgen 生成功能所依赖的模板文件
+add_link_to_asc_tools_template()
+
 setup_kwargs = {
     "include_package_data": True
 }
@@ -47,7 +51,6 @@ def read_txt(file_name):
     """
     with open(file_name) as file_object:
         return file_object.read()
-
 
 setup(
     name="msopgen",
