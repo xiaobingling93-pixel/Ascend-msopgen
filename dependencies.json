@@ -1,0 +1,19 @@
+{
+  "version": "1.0",
+  "artifact_spec": {},
+  "dependency_sets": {
+    "prod": {
+      "submodules": [
+	    "thirdparty/asc-tools"
+	  ],
+      "artifacts": []
+    },
+    "test": {
+      "submodules": [
+	    "thirdparty/asc-tools"
+	  ],
+      "artifacts": []
+    }
+  }
+}
+
