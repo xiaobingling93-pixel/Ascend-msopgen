@@ -15,7 +15,7 @@ st = os.stat(dst)
 os.chmod(dst, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 setup(
-    name="msopst",
+    name="mindstudio-opst",
     version="1.0.0",
     options={
         'bdist_wheel': {

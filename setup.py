@@ -72,7 +72,7 @@ def read_txt(file_name):
         return file_object.read()
 
 setup(
-    name="msopgen",
+    name="mindstudio-opgen",
     version="1.0.0",
     scripts=[dst],
     zip_safe=False,

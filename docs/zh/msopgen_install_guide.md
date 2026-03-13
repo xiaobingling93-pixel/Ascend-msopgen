@@ -11,7 +11,7 @@ pip install -r requirements.txt
 ```
 
 ## 生成whl包
-生成的whl包位于output目录，包含msopgen和msopst两个whl包
+生成的whl包位于output目录，包含mindstudio_opgen和mindstudio_opst两个whl包
 
 ```
 python build.py
@@ -22,22 +22,22 @@ python build.py
 ## 安装whl包
 ```
 cd output
-pip install msopgen-xxxxx.whl
-pip install msopst-xxxxx.whl
+pip install mindstudio_opgen-xxxxx.whl
+pip install mindstudio_opst-xxxxx.whl
 ```
 
 ## 卸载
 卸载则通过如下命令卸载：
 ```
-pip uninstall msopgen-xxxxx.whl 
-pip uninstall msopst-xxxxx.whl
+pip uninstall mindstudio_opgen-xxxxx.whl 
+pip uninstall mindstudio_opst-xxxxx.whl
 ```
 
 ## 升级
 如需使用whl包替换运行环境原有已安装的whl包，执行如下安装操作：
 ```
-pip install msopgen-xxxxx.whl --force-reinstall
-pip install msopst-xxxxx.whl --force-reinstall
+pip install mindstudio_opgen-xxxxx.whl --force-reinstall
+pip install mindstudio_opst-xxxxx.whl --force-reinstall
 ```
 安装过程中，若提示是否替换原有安装包：
 输入"y"，则安装包会自动完成升级操作。
