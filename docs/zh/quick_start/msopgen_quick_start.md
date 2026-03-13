@@ -1,34 +1,43 @@
 # msOpGen算子调试工具快速入门
+
 <br>
 
 ## 1. 概述
+
 msOpGen 工具在算子开发过程中可自动生成自定义算子工程，使用户能够聚焦于算子的核心逻辑与算法实现，避免在项目搭建、编译配置等重复性工作上耗费大量时间，从而显著提升开发效率。    
 本文档基于入门教程中开发的简易加法算子，演示 msOpGen 工具的核心功能，帮助初学者直观体会其在算子开发过程中带来的高效性与便捷性。
 
 ### 1.1 建议
+
 本章节以您已完成<a href="https://gitcode.com/Ascend/msot/blob/master/docs/zh/quick_start/op_tool_quick_start.md" target="_blank">《昇腾算子开发工具链快速入门》</a>的全流程操作为前提；若尚未体验，建议先完成该指南以获得更佳的学习效果。
 
 ### 1.2 环境准备
+
 请严格按照<a href="https://gitcode.com/Ascend/msot/blob/master/docs/zh/quick_start/installation_guide.md" target="_blank">《昇腾 AI 算子开发工具链学习环境安装指南》</a>完成环境安装与工作区配置。
 即使您已具备类似环境，也需按该指南重新执行一遍，以确保所有依赖组件、环境变量等完整且一致。
-
 
 ## 2. 操作步骤
 
 ### 2.1 【环境】运行环境预检
 
 #### 2.1.1 确认 Python 依赖包已安装
+
 执行以下命令，若输出"All is OK"，则表明所需 Python 包及其版本均满足规范：
+
 ```shell
 python3 -c "import numpy, sympy, scipy, attrs, psutil, decorator; from packaging import version; assert version.parse(numpy.__version__) <= version.parse('1.26.4'); print('All is OK')"
 ```
+
 若报错，请参照[第 1.2 节](#12-环境准备)进行正确安装。
 
 ### 2.2 【开发】构建算子工程（msOpGen）
+
 算子工程较为复杂且包含大量框架代码，msOpGen 工具可自动生成完整的算子工程框架，使开发者聚焦于核心算法实现，避免在项目搭建、编译配置等重复性工作上耗费时间。先跟着操作体验效果，原理部分可稍后阅读：
 
 #### 2.2.1 创建子工作区目录
+
 创建名为`src` 的子目录，作为算子源码根目录：
+
 ```shell
 rm -rf ~/ot_demo/workspace/src && mkdir -p ~/ot_demo/workspace/src && cd ~/ot_demo/workspace/src
 ```
@@ -42,6 +51,7 @@ rm -rf ~/ot_demo/workspace/src && mkdir -p ~/ot_demo/workspace/src && cd ~/ot_de
 >算子函数的声明代码统一由工具生成，生成一个空函数（只有函数名、入参和返回值），函数体需要用户自己实现。
 
 请将如下配置文件内容保存为文件 msopgen_demo.json：
+
 ```json
 [
     {
@@ -94,11 +104,13 @@ rm -rf ~/ot_demo/workspace/src && mkdir -p ~/ot_demo/workspace/src && cd ~/ot_de
 
 **2. 生成 Ascend C 算子工程**   
 执行以下命令，请将 -c 参数替换上节查询的拼接值（<span style="color:#e60000;">**注意**</span>：**其中的减号和下划线不能写错，例如：ai<span style="color:#e60000;">_</span>core<span style="color:#e60000;">-</span>ascend910B4**）：
+
 ```shell
 msopgen gen -i msopgen_demo.json -c xxx -lan cpp -out AddCustom
 ```
 
 #### 2.2.4 查看生成的结果   
+
 >[!NOTE]说明 
 >**知识点（可选阅读）：关键概念**       
 >Host侧：运行于CPU的代码，负责数据预处理、任务调度及算子调用；   
@@ -106,6 +118,7 @@ msopgen gen -i msopgen_demo.json -c xxx -lan cpp -out AddCustom
 >Tiling：将大规模数据分块处理，以提高Local Memory利用率并优化内存访问效率。
 
 生成的工程结构看起来很庞大复杂，但我们**仅需关注标记为【用户扩展点】的三个C++文件**，其余均为框架代码，无特殊需求则无需查看或修改：
+
 ```text
 AddCustom
 ├── build.sh                 // 编译入口脚本
@@ -135,7 +148,9 @@ AddCustom
 >若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。
 
 #### 2.3.1 开发 op_host/add_custom_tiling.h
+
 按如下修改，代码实现原理请参考代码注释或阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>：
+
 ```cpp
 /**
  * @file add_custom_tiling.h
@@ -167,7 +182,15 @@ namespace optiling {
 ```
 
 #### 2.3.2 开发 op_host/add_custom.cpp
-按如下修改，代码实现原理请参考代码注释或阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>：
+
+打开生成的 `op_host/add_custom.cpp` 文件，定位并提取包含 `this->AICore().AddConfig` 的代码行，并保存下来，例如：
+
+```cpp
+this->AICore().AddConfig("ascend910_93");
+```
+
+按以下方式修改，但需将其中涉及 `this->AICore().AddConfig` 的代码行替换为上述保存的实际内容（因 SoC 信息随运行环境而异，不可硬编码）：
+
 ```cpp
 /**
  * @file add_custom.cpp
@@ -245,12 +268,8 @@ namespace ops {
                 .Format({ge::FORMAT_ND});
 
             // 配置AICore计算单元，设置分块策略和兼容的芯片型号
-            this->AICore()
-                .SetTiling(optiling::TilingFunc) // 引用上面定义的tiling函数
-                .AddConfig("ascend910b")
-                .AddConfig("ascend910")
-                .AddConfig("ascend310p")
-                .AddConfig("ascend310b");
+            this->AICore().SetTiling(optiling::TilingFunc);
+            this->AICore().AddConfig("ascend910b");
         }
     };
 
@@ -258,8 +277,11 @@ namespace ops {
     OP_ADD(AddCustom);
 } // namespace ops
 ```
+
 #### 2.3.3 开发 op_kernel/add_custom.cpp
+
 按如下修改，代码实现原理请参考代码注释或阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>：
+
 ```cpp
 /**
  * @file add_custom.cpp
@@ -457,13 +479,16 @@ void add_custom_do(uint32_t blockDim, void *l2ctrl, void *stream, uint8_t *x, ui
 ```
 
 ### 2.4 编译与部署算子
+
 **1. 编译算子**  
 执行构建脚本，成功后将在 build_out 目录下生成 .run 格式的算子部署包：
+
 ```shell
 cd ~/ot_demo/workspace/src/AddCustom/
 sed -i 's/--target $target -j$(nproc)/--target $target -j1/g' build.sh
 bash ./build.sh
 ```
+
 **2. 部署算子**   
 
 >[!NOTE]说明   
@@ -472,13 +497,14 @@ bash ./build.sh
 >自动发现并调用该算子。\*.run格式的部署包可以简单理解为一种自解压的压缩包。
 
 因各平台生成的算子部署包名称略有差异，执行以下脚本以自动定位并运行部署包（在固定环境中，实际等效于执行类似 ./build_out/custom_opp_ubuntu_aarch64.run 的命令）：
+
 ```shell
 MY_OP_PKG=$(find ./build_out -maxdepth 1 -name "custom_opp_*.run" | head -1) && bash $MY_OP_PKG
 ```
 
-
 **3. 加入动态库路径**   
 部署成功后，按终端提示追加算子依赖的动态库路径：
+
 ```shell
 export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD_LIBRARY_PATH
 echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD_LIBRARY_PATH" >> ~/.bashrc
@@ -492,6 +518,7 @@ echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD
 >编辑下载的 main.cpp 文件，在 main 函数首行将 deviceId 的值调整为目标 NPU 卡号。   
 
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
+
 ```shell
 mkdir ~/ot_demo/workspace/src/caller
 cd ~/ot_demo/workspace/src/caller
@@ -500,7 +527,9 @@ curl -LO https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/msop
 curl -LO https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/msopgen/caller/run.sh
 bash ./run.sh
 ```
+
 若输出如下内容，结果为 3.0，则表明算子已成功加载并计算正确：
+
 ```text
 result is:
 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 
@@ -510,6 +539,7 @@ test pass
 ### 2.6 【FAQ】常见错误解决
 
 #### 2.6.1 编译调用算子程序时报错如下，怎么解决？
+
 ```text
 -- Build files have been written to: /root/ot_demo/workspace/src/caller/build
 [ 50%] Building CXX object CMakeFiles/execute_add_op.dir/main.cpp.o
@@ -520,9 +550,11 @@ compilation terminated.
 gmake[2]: *** [CMakeFiles/execute_add_op.dir/build.make:76: CMakeFiles/execute_add_op.dir/main.cpp.o] Error 1
 gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/execute_add_op.dir/all] Error 2
 ```
+
 **问题原因：** 算子部署时没有将 op_api/include/aclnn_add_custom.h 部署到正确的位置，导致找不到头文件。一种可能的原因是环境中存在环境变量 `ASCEND_CUSTOM_OPP_PATH` 且值不正确，或者存在多个以冒号间隔的路径，但目前部署头文件时只会成功拷贝到第一个路径中，后续路径均未拷贝。   
 **解决方法：** 删除环境变量，执行`unset ASCEND_CUSTOM_OPP_PATH`，重新部署算子。   
 
 #### 2.6.2 执行workspace/src/caller/run.sh卡住不动？
+
 **问题原因：** 因默认使用 0 号卡运行，可能 0 号卡繁忙或异常。   
 **解决方法：** 执行 `npu-smi info` 查看是否有其他空闲卡，然后修改 caller/main.cpp 中 main 函数第 1 行，将 deviceId 的值修改为其他空闲卡号。 
