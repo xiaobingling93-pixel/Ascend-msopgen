@@ -116,15 +116,15 @@
     msopst create -i "xxx/MatmulCustom/op_host/matmul_custom.cpp" -out ./st
     ```
 
-7.  进行ST测试。
-    1.  根据CANN包安装路径，配置以下环境变量：
+7. 进行ST测试。
+    1. 根据CANN包安装路径，配置以下环境变量：
 
         ```sh
         export DDK_PATH=${INSTALL_DIR}
         export NPU_HOST_LIB=${INSTALL_DIR}/{arch-os}/devlib
         ```
 
-    2.  执行以下命令，进行ST测试，并将输出结果到指定路径。xxx.json为[步骤6](#zh-cn_topic_0000001979357392_li2121117163612)获得的测试用例：
+    2. 执行以下命令，进行ST测试，并将输出结果到指定路径。xxx.json为[步骤6](#zh-cn_topic_0000001979357392_li2121117163612)获得的测试用例：
 
         ```sh
         msopst run -i ./st/xxx.json -soc Ascendxxxyy -out ./st/out  
@@ -286,7 +286,7 @@
     ```json
     [
         {
-    	"case_name": "Test_ReduceSum_001",
+            "case_name": "Test_ReduceSum_001",
             "op": "ReduceSum",
             "input_desc": [
                 {
@@ -303,8 +303,8 @@
                         ]
                     ]
                 },
-    	    {
-    		"format": ["ND"],
+            {
+            "format": ["ND"],
                     "type": ["int32"],
                     "shape": [2],
                     "data_distribute": [
@@ -316,23 +316,23 @@
                             1
                         ]
                     ],
-    		"value":[0,2]            //设置具体值,需要与shape对应
+            "value":[0,2]            //设置具体值,需要与shape对应
                 }
-    	],
-    	"output_desc": [
+        ],
+        "output_desc": [
                 {
                     "format": ["ND"],
                     "type": ["int32"],
                     "shape": [6,4]
                 }
             ],
-    	"attr":[
-    	    {
-    		"name":"keep_dims",
-    		"type":"bool",
-    		"value":false
-    	    }
-    	]
+        "attr":[
+            {
+            "name":"keep_dims",
+            "type":"bool",
+            "value":false
+            }
+        ]
         }
     ]
     ```
@@ -342,28 +342,28 @@
     ```json
     [
         {
-    	"case_name": "Test_ArgMin_001",
+        "case_name": "Test_ArgMin_001",
             "op": "ArgMin",
             "input_desc": [
                 {
                 ...
                 },
-    	    {
+            {
                 ...
                 }
-    	],
-    	"output_desc": [
+        ],
+        "output_desc": [
                 {
                 ...
                 }
             ],
-    	"attr":[
-    	    {
-    		"name":"dtype",
-    		"type":"data_type",
-    		"value":"int64"
-    	    }
-    	]
+        "attr":[
+            {
+            "name":"dtype",
+            "type":"data_type",
+            "value":"int64"
+            }
+        ]
         }
     ]
     ```
@@ -378,19 +378,19 @@
             "op": "AddN",
             "input_desc": [
                 {
-    		"name":"x0",
+            "name":"x0",
                     "format": "NCHW",
                     "shape": [1,3,166,166],
                     "type": "float32"
                 },
                 {
-    		"name":"x1",
+            "name":"x1",
                     "format": "NCHW",
                     "shape": [1,3,166,166],
                     "type": "int32"
                 },
                 {
-    		"name":"x2",
+            "name":"x2",
                     "format": "NCHW",
                     "shape": [1,3,166,166],
                     "type": "float32"
@@ -513,4 +513,3 @@
         }
     ]
     ```
-
