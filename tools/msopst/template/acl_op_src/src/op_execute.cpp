@@ -173,7 +173,7 @@ void GetRecentErrMsg()
 bool OpExecuteInit()
 {
     static bool hasInited = false;
-    if (hasInited == false) {
+    if (!hasInited) {
         hasInited = true;
 
         std::string output = "./result_files";

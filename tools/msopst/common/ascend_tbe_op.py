@@ -309,7 +309,7 @@ class AscendOpKernelParam:
 
     # 'pylint: disable=too-many-arguments
     def __init__(self, np_data=None, shape=None, dtype=None, ascend_device: AscendRTSApi = None,
-                 hbm_pointer: ctypes.c_void_p = None):
+                 gm_pointer: ctypes.c_void_p = None):
         if np_data is not None:
             self._np_data = np_data
             self._is_const = True
@@ -325,7 +325,7 @@ class AscendOpKernelParam:
             raise RuntimeError("Shape size < 0.")
         self.size = calc_op_param_size(shape_size, self.dtype)
         self.shape_size = shape_size
-        self._hbm_pointer = hbm_pointer
+        self._gm_pointer = gm_pointer
         self._ascend_device = ascend_device
 
     @staticmethod
@@ -358,8 +358,8 @@ class AscendOpKernelParam:
         """
         sync from device
         """
-        if self._ascend_device and self._hbm_pointer:
-            byte_data, _ = self._ascend_device.get_data_from_hbm(self._hbm_pointer, self.size)
+        if self._ascend_device and self._gm_pointer:
+            byte_data, _ = self._ascend_device.get_data_from_gm(self._gm_pointer, self.size)
             np_data = np.frombuffer(byte_data, dtype=dtype_trans.str_to_np_dtype(self.dtype))
             np_data = np_data[:self.shape_size]
             self._np_data = np.reshape(np_data, self.shape)
@@ -369,21 +369,21 @@ class AscendOpKernelParam:
         sync_to_device
         """
         self._ascend_device = ascend_device
-        self._hbm_pointer = self._ascend_device.copy_bin_to_hbm(self._np_data.tobytes())
+        self._gm_pointer = self._ascend_device.copy_bin_to_gm(self._np_data.tobytes())
 
     def is_in_device(self):
         """
         check whether in_device
         """
-        return self._hbm_pointer is not None
+        return self._gm_pointer is not None
 
     def release_device(self):
         """
         release device
         """
-        if self._ascend_device and self._hbm_pointer:
-            self._ascend_device.free(self._hbm_pointer)
-            self._hbm_pointer = None
+        if self._ascend_device and self._gm_pointer:
+            self._ascend_device.free(self._gm_pointer)
+            self._gm_pointer = None
 
         if self._ascend_device:
             self._ascend_device = None
@@ -392,7 +392,7 @@ class AscendOpKernelParam:
         """
         concat into kernel args
         """
-        kernel_args.append(self._hbm_pointer)
+        kernel_args.append(self._gm_pointer)
 
     def get_data(self):
         """
@@ -499,18 +499,18 @@ class AscendOpKernelRunner:
 
         output_params = []
         self._fill_outputs(kernel, output_input_ref, actual_output_info, input_params, output_params, kernel_args)
-        workspace_hbm_p_list = []
-        self._fill_workspace(kernel, workspace_hbm_p_list, kernel_args)
-        tiling_hbm = []
-        self._fill_tiling(kernel, tiling, tiling_hbm, kernel_args)
+        workspace_gm_p_list = []
+        self._fill_workspace(kernel, workspace_gm_p_list, kernel_args)
+        tiling_gm = []
+        self._fill_tiling(kernel, tiling, tiling_gm, kernel_args)
         knl_args = [arg.value for arg in kernel_args]
         if not block_dim:
             block_dim = kernel.block_dim
         self._execute_kernel(kernel, knl_args, block_dim)
-        for workspace_hbm_p in workspace_hbm_p_list:
-            self.ascend_device.free(workspace_hbm_p)
-        for tiling_hbm_p in tiling_hbm:
-            self.ascend_device.free(tiling_hbm_p)
+        for workspace_gm_p in workspace_gm_p_list:
+            self.ascend_device.free(workspace_gm_p)
+        for tiling_gm_p in tiling_gm:
+            self.ascend_device.free(tiling_gm_p)
         return output_params[0] if len(output_params) == 1 else output_params
 
     def _collect_esl_log(self):
@@ -547,11 +547,11 @@ class AscendOpKernelRunner:
                 input_param = self.build_kernel_param(input_info)
                 input_param.concat_into_kernel_args(kernel_args)
 
-    def _fill_workspace(self, kernel: AscendOpKernel, wksp_hbm_pointers: List, kernel_args: List):
+    def _fill_workspace(self, kernel: AscendOpKernel, wksp_gm_pointers: List, kernel_args: List):
         for workspace_size in kernel.workspace:
-            wksp_hbm_p = self.ascend_device.malloc(workspace_size + 32)
-            wksp_hbm_pointers.append(wksp_hbm_p)
-            kernel_args.append(wksp_hbm_p)
+            wksp_gm_p = self.ascend_device.malloc(workspace_size + 32)
+            wksp_gm_pointers.append(wksp_gm_p)
+            kernel_args.append(wksp_gm_p)
 
     def _fill_outputs(self, kernel: AscendOpKernel,
                       output_input_ref: List[List[int]],
@@ -575,24 +575,24 @@ class AscendOpKernelRunner:
                     if not out_size:
                         shape_size = shape_utils.calc_shape_size(shape)
                         out_size = -1 if shape_size < 0 else calc_op_param_size(shape_size, dtype)
-                    out_hbm_pointer = self.ascend_device.malloc(out_size)
-                    self.ascend_device.memset(out_hbm_pointer, out_size, 0, out_size)
+                    out_gm_pointer = self.ascend_device.malloc(out_size)
+                    self.ascend_device.memset(out_gm_pointer, out_size, 0, out_size)
                     output_param = AscendOpKernelParam(shape=shape,
                                                        dtype=dtype,
                                                        ascend_device=self.ascend_device,
-                                                       hbm_pointer=out_hbm_pointer)
+                                                       gm_pointer=out_gm_pointer)
                 output_params.append(output_param)
                 output_param.concat_into_kernel_args(kernel_args)
                 self.cache_kernel_param(output_param)
 
-    def _fill_tiling(self, kernel: AscendOpKernel, tiling_data: bytes, tiling_hbm: List, kernel_args: List):
+    def _fill_tiling(self, kernel: AscendOpKernel, tiling_data: bytes, tiling_gm: List, kernel_args: List):
         if not kernel.need_do_tiling:
             return
         if not tiling_data:
             raise RuntimeError("Tiling data is None")
-        hbm_pointer = self.ascend_device.copy_bin_to_hbm(tiling_data)
-        tiling_hbm.append(hbm_pointer)
-        kernel_args.append(hbm_pointer)
+        gm_pointer = self.ascend_device.copy_bin_to_gm(tiling_data)
+        tiling_gm.append(gm_pointer)
+        kernel_args.append(gm_pointer)
 
     def _execute_kernel(self, kernel: AscendOpKernel, kernel_args, block_dim):
         if self.profiling:

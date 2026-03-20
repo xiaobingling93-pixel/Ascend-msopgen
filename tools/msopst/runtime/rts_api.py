@@ -460,9 +460,9 @@ class AscendRTSApi:
         self.kernel_name_storage[rts_binary_handle.value].append(kernel_name_bytes)
         return c_kernel_name_p
 
-    def copy_bin_file_to_hbm(self, bin_path: str) -> ctypes.c_void_p:
+    def copy_bin_file_to_gm(self, bin_path: str) -> ctypes.c_void_p:
         """
-        Copy bin file to hbm
+        Copy bin file to gm
 
         Parameters
         ----------
@@ -471,14 +471,14 @@ class AscendRTSApi:
 
         Returns
         -------
-        hbm buffer pointer
+        gm buffer pointer
         """
         data = file_util.read_file(bin_path, 34359738368)
-        return self.copy_bin_to_hbm(data)
+        return self.copy_bin_to_gm(data)
 
-    def copy_bin_to_hbm(self, data: bytes) -> ctypes.c_void_p:
+    def copy_bin_to_gm(self, data: bytes) -> ctypes.c_void_p:
         """
-        Copy bin data to hbm
+        Copy bin data to gm
 
         Parameters
         ----------
@@ -487,31 +487,31 @@ class AscendRTSApi:
 
         Returns
         -------
-        hbm buffer pointer
+        gm buffer pointer
 
         """
         if not isinstance(data, bytes):
-            raise TypeError("Copy binary to hbm supports bytes only, reveviced %s" % str(type(data)))
+            raise TypeError("Copy binary to gm supports bytes only, reveviced %s" % str(type(data)))
 
         try:
-            c_memory_p = self.malloc(int(math.ceil(len(data) / 32) * 32 + 32), "RT_MEMORY_HBM")
+            c_memory_p = self.malloc(int(math.ceil(len(data) / 32) * 32 + 32), "RT_MEMORY_GM")
         except BaseException as e:
-            logger.log_err("rtMalloc on HBM failed, HBM memory info:  %s"
-                           % str(self.get_memory_info_ex("RT_MEMORYINFO_HBM")))
+            logger.log_err("rtMalloc on GM failed, GM memory info:  %s"
+                           % str(self.get_memory_info_ex("RT_MEMORYINFO_GM")))
             raise
         self.memcpy(c_memory_p, int(math.ceil(len(data) / 32) * 32 + 32), data, len(data), "RT_MEMCPY_HOST_TO_DEVICE")
         return c_memory_p
 
-    def get_data_from_hbm(self,
+    def get_data_from_gm(self,
                           c_memory_p: ctypes.c_void_p,
                           data_size: int):
         """
-        Get data from hbm
+        Get data from gm
 
         Parameters
         ----------
         c_memory_p: ctypes.c_void_p
-            a void* which points to the hbm address you want to access
+            a void* which points to the gm address you want to access
         data_size: int
             data size in bytes
 
@@ -520,7 +520,7 @@ class AscendRTSApi:
         data: bytes
             binary data
         pointer: ctypes.c_void_p
-            hbm buffer pointer
+            gm buffer pointer
         """
         if not isinstance(c_memory_p, ctypes.c_void_p):
             c_memory_p = ctypes.c_void_p(c_memory_p)
@@ -630,7 +630,7 @@ class AscendRTSApi:
 
         Returns
         -------
-        hbm buffer pointer
+        gm buffer pointer
         """
         c_memory_p = ctypes.c_void_p()
         c_memory_size = ctypes.c_uint64(memory_size)
@@ -655,7 +655,7 @@ class AscendRTSApi:
 
         Returns
         -------
-        hbm buffer pointer
+        gm buffer pointer
         """
         c_memory_p = ctypes.c_void_p()
         c_memory_size = ctypes.c_uint64(memory_size)
