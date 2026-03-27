@@ -513,18 +513,20 @@ echo "export LD_LIBRARY_PATH=${ASCEND_OPP_PATH}/vendors/customize/op_api/lib:$LD
 ### 2.5 验证算子功能
 
 >[!CAUTION]注意   
->**关于 NPU 卡号的配置**   
->以下 run.sh 脚本将实际执行算子，默认使用 0 号 NPU 卡。若您必须使用其他卡，或 0 号卡运行算子异常需要换用其他正常卡，请按如下方式修改卡号：     
->编辑下载的 main.cpp 文件，在 main 函数首行将 deviceId 的值调整为目标 NPU 卡号。   
+>**关于 NPU 设备选择的说明**   
+>执行以下 `run.sh` 脚本将实际运行算子。为便于学习，假设环境中所有 NPU 卡型号相同，系统将随机选择一张空闲卡执行任务。
+>若因随机选定的卡存在故障等原因需指定 NPU 卡，请根据 `npu-smi info` 命令返回的 NPU 逻辑 ID，按如下方式调用，例如固定使用 2 号卡：
+>
+> ```shell
+> bash ./run.sh 2
+> ```
 
 执行算子调用工程，验证算子功能（本例执行 1.0 + 2.0，预期结果为 3.0）：
 
 ```shell
 mkdir ~/ot_demo/workspace/src/caller
 cd ~/ot_demo/workspace/src/caller
-curl -LO https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/msopgen/caller/CMakeLists.txt
-curl -LO https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/msopgen/caller/main.cpp
-curl -LO https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/msopgen/caller/run.sh
+curl -fLO --retry 10 --retry-all-errors --retry-delay 3 -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" "https://raw.gitcode.com/Ascend/msot/raw/master/example/quick_start/msopgen/caller/{CMakeLists.txt,main.cpp,exec.py,run.sh}"
 bash ./run.sh
 ```
 
@@ -534,6 +536,15 @@ bash ./run.sh
 result is:
 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 3.0 
 test pass
+```
+
+若出现类似如下错误，可能原因包括：NPU卡异常（硬件故障、驱动问题等），/dev/hisi_hdc 设备异常（如容器内未成功挂载、缺乏访问权限、因线程数过多导致设备无法打开等），以及内存等系统资源不足等。    
+错误码说明请参见：[《ACL错误码表》](https://www.hiascend.com/document/detail/zh/CANNCommunityEdition/850/API/appdevgapi/aclcppdevg_03_1345.html)，
+请先解决 NPU 卡故障或更换为其他正常卡后再继续体验（指定 NPU 卡运行的方法详见上文“关于 NPU 设备选择的说明”）：
+
+```text
+aclrtSetDevice failed. ERROR: xxxxxx
+Init acl failed. ERROR: 1
 ```
 
 ### 2.6 【FAQ】常见错误解决
@@ -553,8 +564,3 @@ gmake[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/execute_add_op.dir/all] Error
 
 **问题原因：** 算子部署时没有将 op_api/include/aclnn_add_custom.h 部署到正确的位置，导致找不到头文件。一种可能的原因是环境中存在环境变量 `ASCEND_CUSTOM_OPP_PATH` 且值不正确，或者存在多个以冒号间隔的路径，但目前部署头文件时只会成功拷贝到第一个路径中，后续路径均未拷贝。   
 **解决方法：** 删除环境变量，执行`unset ASCEND_CUSTOM_OPP_PATH`，重新部署算子。   
-
-#### 2.6.2 执行workspace/src/caller/run.sh卡住不动？
-
-**问题原因：** 因默认使用 0 号卡运行，可能 0 号卡繁忙或异常。   
-**解决方法：** 执行 `npu-smi info` 查看是否有其他空闲卡，然后修改 caller/main.cpp 中 main 函数第 1 行，将 deviceId 的值修改为其他空闲卡号。 
