@@ -73,7 +73,7 @@ def read_txt(file_name):
 
 setup(
     name="mindstudio-opgen",
-    version="1.0.0",
+    version="26.0.0",
     scripts=[dst],
     zip_safe=False,
     package_dir={'': '.'},
