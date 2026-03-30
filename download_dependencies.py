@@ -77,7 +77,7 @@ class DependencyManager:
         base = ["git", "submodule", "update", "--init", "--progress", "--depth=1", "--jobs=4"]
 
         if third:
-            self._exec_shell_cmd(base + ["--recursive"] + third, msg="Fetching third-party submodules...")
+            self._exec_shell_cmd(base + ["--recursive", "--remote"] + third, msg="Fetching third-party submodules...")
         if builtin:
             self._exec_shell_cmd(base + ["--remote"] + builtin, msg="Fetching built-in submodules...")
             for m in builtin:
