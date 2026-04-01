@@ -6,7 +6,7 @@
 
 **前提条件**
 
-参考《[MindStudio Ops Generator工具用户指南](./msopgen_user_guide.md)》中的“使用前准备”章节，完成msOpGen工具的使用准备。
+参考《[MindStudio Ops Generator工具用户指南](../user_guide/msopgen_user_guide.md)》中的“使用前准备”章节，完成msOpGen工具的使用准备。
 
 **操作步骤**
 

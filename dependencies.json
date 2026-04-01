@@ -6,13 +6,19 @@
       "submodules": [
 	    "thirdparty/asc-tools"
 	  ],
-      "artifacts": []
+      "artifacts": [],
+      "force_latest_submodules": [
+        "thirdparty/asc-tools"
+      ]
     },
     "test": {
       "submodules": [
 	    "thirdparty/asc-tools"
 	  ],
-      "artifacts": []
+      "artifacts": [],
+      "force_latest_submodules": [
+        "thirdparty/asc-tools"
+      ]
     }
   }
 }
