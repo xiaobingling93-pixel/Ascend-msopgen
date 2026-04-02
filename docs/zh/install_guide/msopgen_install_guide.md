@@ -69,10 +69,10 @@ pip install mindstudio_opst-xxxxx.whl --force-reinstall
 
 ### 运行ut、st测试用例
 
-`3.7 <= python版本要求 <=3.10`
+`3.7 <= python版本要求 <=3.10`，\${INSTALL_DIR}请替换为CANN软件安装后文件存储路径。例如，若安装的Ascend-cann-toolkit软件包，安装后文件存储路径示例为：$HOME/Ascend/cann
 
 ```shell
-source /path/to/Ascend/cann/set_env.sh
+source ${INSTALL_DIR}/set_env.sh
 ```
 
 测试报告在output目录
