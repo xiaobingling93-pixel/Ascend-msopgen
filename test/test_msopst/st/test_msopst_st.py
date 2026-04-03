@@ -706,15 +706,17 @@ class TestUtilsMethods(unittest.TestCase):
             with mock.patch('sys.argv', args):
                 with mock.patch('msopst.st.interface.utils'
                                 '.check_path_valid'):
-                    with mock.patch('builtins.open', mock.mock_open(
-                            read_data=lines)):
-                        with mock.patch('msopst.st.interface'
-                                        '.case_generator'
-                                        '.importlib.import_module'):
-                            with mock.patch('msopst.st.interface.arg_parser.'
-                                'MsopstArgParser._check_path_permission_valid', 
-                                return_value=None):
-                                msopst.main()
+                    with mock.patch('msopst.st.interface.utils'
+                                    '.check_input_permission_valid'):
+                        with mock.patch('builtins.open', mock.mock_open(
+                                read_data=lines)):
+                            with mock.patch('msopst.st.interface'
+                                            '.case_generator'
+                                            '.importlib.import_module'):
+                                with mock.patch('msopst.st.interface.arg_parser.'
+                                    'MsopstArgParser._check_path_permission_valid',
+                                    return_value=None):
+                                    msopst.main()
 
         self.assertTrue(test_utils.check_file_context(
             ST_OUTPUT, ST_MS_GOLDEN_JSON_OUTPUT))
