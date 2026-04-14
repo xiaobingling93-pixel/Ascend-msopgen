@@ -230,8 +230,7 @@ class ArgParser:
                                   "write.")
             raise utils.MsOpGenException(ConstManager.MS_OP_GEN_CONFIG_INVALID_OUTPUT_PATH_ERROR)
         if not utils.check_path_owner_consistent(args_output_path):
-            utils.print_error_log('You are not the owner of path {}.'.format(args_output_path))
-            raise utils.MsOpGenException(ConstManager.MS_OP_GEN_CONFIG_INVALID_OUTPUT_PATH_ERROR)
+            utils.print_warn_log('You are not the owner of path {}.'.format(args_output_path))
 
     def _check_input_path(self: any, args_input: str) -> None:
         if not args_input.endswith(ConstManager.GEN_VALID_TYPE):
@@ -253,8 +252,7 @@ class ArgParser:
                                   "and readable file. Or check it is larger than 10 MB.")
             raise utils.MsOpGenException(ConstManager.MS_OP_GEN_CONFIG_INVALID_OPINFO_FILE_ERROR)
         if not utils.check_path_owner_consistent(self.input_path):
-            utils.print_error_log('You are not the owner of path {}.'.format(self.input_path))
-            raise utils.MsOpGenException(ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
+            utils.print_warn_log('You are not the owner of path {}.'.format(self.input_path))
 
     def _init_core_type(self: any, unit_parse_list: list, type_list: list, core_type: any) -> None:
         if unit_parse_list[0].lower() in type_list:

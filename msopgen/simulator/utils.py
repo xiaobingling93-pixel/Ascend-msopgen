@@ -68,8 +68,7 @@ class CheckPath:
     def check_file(cls, file_path, access_type=os.R_OK, max_file_size=1024**3):
         cls._check_path_pattern_valid(file_path)
         if cls._islink(file_path):
-            raise Dump2TraceException(
-                "%s doesn't support soft link." % cls._to_safe_string(file_path))
+            logger.warning("%s is soft link.", cls._to_safe_string(file_path))
         file_path = os.path.realpath(file_path)
         if not os.path.exists(file_path):
             raise Dump2TraceException("%s doesn't exist." % cls._to_safe_string(file_path))
@@ -82,8 +81,7 @@ class CheckPath:
             raise Dump2TraceException(
                 "File %s is not a valid file." % cls._to_safe_string(file_path))
         if not cls._check_path_owner_consistent(file_path):
-            raise Dump2TraceException(
-                "The file %s is not belong to you." % cls._to_safe_string(file_path))
+            logger.warning("The file %s is not belong to you.", cls._to_safe_string(file_path))
         cls._check_input_permission_valid(file_path)
         if os.path.getsize(file_path) >= max_file_size:
             raise Dump2TraceException(
@@ -94,7 +92,7 @@ class CheckPath:
     def check_path(cls, path, access_type, makedir=False):
         cls._check_path_pattern_valid(path)
         if cls._islink(path):
-            raise Dump2TraceException("%s doesn't support soft link." % cls._to_safe_string(path))
+            logger.warning("%s is soft link.", cls._to_safe_string(path))
         path = os.path.realpath(path)
         if not os.path.exists(path):
             if makedir:
@@ -109,7 +107,7 @@ class CheckPath:
         if not os.path.isdir(path):
             raise Dump2TraceException("%s is not a valid directory." % cls._to_safe_string(path))
         if not cls._check_path_owner_consistent(path):
-            raise Dump2TraceException("%s does not belong to you." % cls._to_safe_string(path))
+            logger.warning("%s does not belong to you.", cls._to_safe_string(path))
         cls._check_input_permission_valid(path)
         cls._check_files_in_folder_valid(path)
         dir_path = os.path.dirname(os.path.realpath(path))
@@ -169,8 +167,8 @@ class CheckPath:
             raise Dump2TraceException("%s input path does not exist" % cls._to_safe_string(path))
         file_stat = os.stat(path)
         if bool(file_stat.st_mode & stat.S_IWGRP) or bool(file_stat.st_mode & stat.S_IWOTH):
-            raise Dump2TraceException("%s input path should not be written by user group or others, "
-                                      "which will cause security risks" % cls._to_safe_string(path))
+            logger.warning("%s input path should not be written by user group or others, "
+                          "which will cause security risks", cls._to_safe_string(path))
 
 
 class Logger(logging.Logger):

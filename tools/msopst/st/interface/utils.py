@@ -319,8 +319,7 @@ def check_path_valid(path, isdir=False):
         print_error_log("The path is null. Please check whether the argument is valid.")
         raise OpTestGenException(ConstManager.OP_TEST_GEN_INVALID_PARAM_ERROR)
     if islink(path):
-        print_error_log('The path {} is soft link. Not support'.format(path))
-        raise OpTestGenException(ConstManager.OP_TEST_GEN_INVALID_PATH_ERROR)
+        print_warn_log('The path {} is soft link.'.format(path))
     path = os.path.realpath(path)
     if isdir and not os.path.exists(path):
         try:
@@ -366,9 +365,8 @@ def check_input_permission_valid(path):
         raise OpTestGenException(ConstManager.OP_TEST_GEN_INVALID_PATH_ERROR)
     file_stat = os.stat(path)
     if bool(file_stat.st_mode & stat.S_IWGRP) or bool(file_stat.st_mode & stat.S_IWOTH):
-        print_error_log('The path {} should not be written by user group or others, '
-                        'which will cause security risks'.format(path))
-        raise OpTestGenException(ConstManager.OP_TEST_GEN_INVALID_PATH_ERROR)
+        print_warn_log('The path {} should not be written by user group or others, '
+                       'which will cause security risks'.format(path))
 
 
 def check_path_pattern_valid(path):

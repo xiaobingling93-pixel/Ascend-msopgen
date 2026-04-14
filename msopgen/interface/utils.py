@@ -386,8 +386,7 @@ def check_path_valid(path: str, isdir=False, access_type=os.R_OK) -> None:
             raise MsOpGenException(ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
     check_input_permission_valid(path)
     if not check_path_owner_consistent(path):
-        print_error_log('You are not the owner of path {}.'.format(path))
-        raise MsOpGenException(ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
+        print_warn_log('You are not the owner of path {}.'.format(path))
 
 
 def check_path_is_valid(path):
@@ -431,9 +430,8 @@ def check_input_permission_valid(path):
         raise MsOpGenException(ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
     file_stat = os.stat(path)
     if bool(file_stat.st_mode & stat.S_IWGRP) or bool(file_stat.st_mode & stat.S_IWOTH):
-        print_error_log('The path {} should not be written by user group or others, '
-                        'which will cause security risks'.format(path))
-        raise MsOpGenException(ConstManager.MS_OP_GEN_INVALID_PATH_ERROR)
+        print_warn_log('The path {} should not be written by user group or others, '
+                       'which will cause security risks'.format(path))
 
 
 def islink(path):
