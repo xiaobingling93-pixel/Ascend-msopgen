@@ -121,7 +121,7 @@
 
         ```sh
         export DDK_PATH=${INSTALL_DIR}
-        export NPU_HOST_LIB=${INSTALL_DIR}/{arch-os}/devlib
+        export NPU_HOST_LIB=${INSTALL_DIR}/${arch-os}/devlib
         ```
 
     2. 执行以下命令，进行ST测试，并将输出结果到指定路径。xxx.json为[步骤6](#zh-cn_topic_0000001979357392_li2121117163612)获得的测试用例：
@@ -132,7 +132,7 @@
 
 ## msOpST测试用例定义文件<a id="ZH-CN_TOPIC_0000002539685293"></a>
 
-- Less算子的测试用例定义文件“Less\_case.json”如下所示。
+- Less算子的测试用例定义文件“Less_case.json”如下所示。
 
     ```json
     [

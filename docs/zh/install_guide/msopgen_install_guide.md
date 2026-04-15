@@ -2,7 +2,7 @@
 
 ## 安装说明
 
-MindStudio Ops Generator（算子工程创建，msOpGen）是算子开发效率提升工具，提供模板工程生成能力，简化算子工程搭建并辅助算子测试验证。MindStudio Ops System Test（算子测试，msOpST）是算子开发效率提升工具，旨在真实的硬件环境中，对算子的输入输出进行测试，以验证算子的功能是否正确。本文主要介绍msOpGen和msOpST工具的安装方法。  
+MindStudio Ops Generator（算子工程创建，msOpGen）是算子开发效率提升工具，提供模板工程生成能力，简化算子工程搭建并辅助算子测试验证。MindStudio Ops System Test（算子测试，msOpST）是算子开发效率提升工具，旨在真实的硬件环境中，对算子的输入输出进行测试，以验证算子的功能是否正确。本文主要介绍msOpGen和msOpST工具的安装方法。
 
 ## 安装前准备
 
@@ -14,13 +14,11 @@ MindStudio工具链是集成到CANN包中发布的，可通过以下方式完成
 
 ##### 方式一：依据 CANN 官方文档安装  
 
-请参考<a href="https://www.hiascend.com/document/detail/zh/canncommercial/850/softwareinst" target="_blank">《CANN安装官方文档》</a>，
-按文档逐步安装和配置。
+请参考《[CANN 官方安装指南](https://www.hiascend.com/cann/download)》，按文档逐步完成安装与配置。
 
-##### 方式二：使用CANN官方容器镜像   
+#### 方式二：使用 CANN 官方容器镜像
 
-请访问<a href="https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884" target="_blank">《CANN官方镜像仓库》</a>，
-按照仓库中的指引完成镜像拉取及容器启动。
+请访问《[CANN 官方镜像仓库](https://www.hiascend.com/developer/ascendhub/detail/17da20d1c2b6493cb38765adeba85884)》，按仓库中的指引完成镜像拉取及容器启动。
 
 #### 安装python依赖
 
@@ -69,7 +67,7 @@ pip install mindstudio_opst-xxxxx.whl --force-reinstall
 
 ### 运行ut、st测试用例
 
-`3.7 <= python版本要求 <=3.10`，\${INSTALL_DIR}请替换为CANN软件安装后文件存储路径。例如，若安装的Ascend-cann-toolkit软件包，安装后文件存储路径示例为：$HOME/Ascend/cann
+`3.7 <= python版本要求 <=3.10`，${INSTALL_DIR}请替换为CANN软件安装后文件存储路径。例如，若安装的Ascend-cann-toolkit软件包，安装后文件存储路径示例为：$HOME/Ascend/cann
 
 ```shell
 source ${INSTALL_DIR}/set_env.sh
