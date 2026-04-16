@@ -16,7 +16,7 @@ os.chmod(dst, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 setup(
     name="mindstudio-opst",
-    version="26.0.0",
+    version=os.environ.get('WHL_VERSION', '26.0.0'),
     options={
         'bdist_wheel': {
             'python_tag': 'py3'}},
