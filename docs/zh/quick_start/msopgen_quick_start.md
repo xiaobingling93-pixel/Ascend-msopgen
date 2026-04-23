@@ -122,18 +122,16 @@ msopgen gen -i msopgen_demo.json -c xxx -lan cpp -out AddCustom
 ```text
 AddCustom
 ├── build.sh                 // 编译入口脚本
-├── cmake                    // 编译工程脚本
 ├── CMakeLists.txt           // 算子工程的CMakeLists.txt
-├── scripts                  // 自定义算子工程打包相关脚本所在目录
 ├── framework                // 算子插件实现文件目录，单算子模型文件的生成不依赖算子适配插件，无需关注
 │   ├── CMakeLists.txt
 │   └── tf_plugin
 ├── op_host                  // Host侧实现文件
 │   ├── add_custom.cpp       // 【用户扩展点】算子原型注册、shape推导、信息库、tiling实现等内容文件
-│   ├── add_custom_tiling.h  // 【用户扩展点】算子tiling定义文件
 │   └── CMakeLists.txt
 ├── op_kernel                // Kernel侧实现文件
 │   ├── add_custom.cpp       // 【用户扩展点】算子代码实现文件 
+│   ├── add_custom_tiling.h  // 【用户扩展点】算子tiling定义文件
 │   └── CMakeLists.txt
 └── CMakePresets.json        // 编译配置项
 ```
@@ -141,13 +139,13 @@ AddCustom
 ### 2.3 实现核心逻辑
 
 >[!NOTE]说明    
->**知识点（可选阅读）：算子核心代码文件实现原理**    
->op_host/add_custom_tiling.h：定义Tiling分块策略的数据结构；   
+>**知识点（可选阅读）：算子核心代码文件实现原理**  
 >op_host/add_custom.cpp：实现Host侧的Tiling计算逻辑与算子原型注册；   
->op_kernel/add_custom.cpp：实现Kernel侧加法算子的具体计算逻辑（GM→UB搬运→向量加法→UB→GM写回）；   
+>op_kernel/add_custom_tiling.h：定义Tiling分块策略的数据结构；  
+>op_kernel/add_custom.cpp：实现Kernel侧加法算子的具体计算逻辑（GM→UB搬运→向量加法→UB→GM写回）；     
 >若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。
 
-#### 2.3.1 开发 op_host/add_custom_tiling.h
+#### 2.3.1 开发 op_kernel/add_custom_tiling.h
 
 按如下修改，代码实现原理请参考代码注释或阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>：
 
@@ -201,7 +199,7 @@ this->AICore().AddConfig("ascend910_93");
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
-#include "add_custom_tiling.h"
+#include "../op_kernel/add_custom_tiling.h"
 #include "register/op_def_registry.h"
 
 namespace optiling {
