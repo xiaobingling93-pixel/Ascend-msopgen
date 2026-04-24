@@ -9,7 +9,7 @@ msOpGen 工具在算子开发过程中可自动生成自定义算子工程，使
 
 ### 1.1 建议
 
-本章节以您已完成<a href="https://gitcode.com/Ascend/msot/blob/master/docs/zh/quick_start/op_tool_quick_start.md" target="_blank">《昇腾算子开发工具链快速入门》</a>的全流程操作为前提；若尚未体验，建议先完成该指南以获得更佳的学习效果。
+本章节以您已完成<a href="https://gitcode.com/Ascend/msot/blob/master/docs/zh/quick_start/op_tool_quick_start.md" target="_blank">《算子开发工具快速入门》</a>的全流程操作为前提；若尚未体验，建议先完成该指南以获得更佳的学习效果。
 
 ### 1.2 环境准备
 
@@ -44,11 +44,11 @@ rm -rf ~/ot_demo/workspace/src && mkdir -p ~/ot_demo/workspace/src && cd ~/ot_de
 
 #### 2.2.2 开发算子定义配置文件
 
->[!NOTE]说明   
->**知识点（可选阅读）：msOpGen输入配置文件**   
->自定义格式的JSON配置文件，可以简单类比理解为定义了一个C语言函数的声明，包括：函数名、入参及返回值的类型信息。
->比如 msopgen_demo.json 中定义了算子的名字、输入输出变量的名字、类型、数据排布格式。
->算子函数的声明代码统一由工具生成，生成一个空函数（只有函数名、入参和返回值），函数体需要用户自己实现。
+> [!NOTE]   
+> **知识点（可选阅读）：msOpGen输入配置文件**   
+> 自定义格式的JSON配置文件，可以简单类比理解为定义了一个C语言函数的声明，包括：函数名、入参及返回值的类型信息。
+> 比如 msopgen_demo.json 中定义了算子的名字、输入输出变量的名字、类型、数据排布格式。
+> 算子函数的声明代码统一由工具生成，生成一个空函数（只有函数名、入参和返回值），函数体需要用户自己实现。
 
 请将如下配置文件内容保存为文件 msopgen_demo.json：
 
@@ -111,11 +111,11 @@ msopgen gen -i msopgen_demo.json -c xxx -lan cpp -out AddCustom
 
 #### 2.2.4 查看生成的结果   
 
->[!NOTE]说明 
->**知识点（可选阅读）：关键概念**       
->Host侧：运行于CPU的代码，负责数据预处理、任务调度及算子调用；   
->Kernel侧：运行于NPU的代码，负责执行实际的大规模并行计算逻辑；   
->Tiling：将大规模数据分块处理，以提高Local Memory利用率并优化内存访问效率。
+> [!NOTE]   
+> **知识点（可选阅读）：关键概念**       
+> Host侧：运行于CPU的代码，负责数据预处理、任务调度及算子调用；   
+> Kernel侧：运行于NPU的代码，负责执行实际的大规模并行计算逻辑；   
+> Tiling：将大规模数据分块处理，以提高Local Memory利用率并优化内存访问效率。
 
 生成的工程结构看起来很庞大复杂，但我们**仅需关注标记为【用户扩展点】的三个C++文件**，其余均为框架代码，无特殊需求则无需查看或修改：
 
@@ -138,12 +138,12 @@ AddCustom
 
 ### 2.3 实现核心逻辑
 
->[!NOTE]说明    
->**知识点（可选阅读）：算子核心代码文件实现原理**  
->op_host/add_custom.cpp：实现Host侧的Tiling计算逻辑与算子原型注册；   
->op_kernel/add_custom_tiling.h：定义Tiling分块策略的数据结构；  
->op_kernel/add_custom.cpp：实现Kernel侧加法算子的具体计算逻辑（GM→UB搬运→向量加法→UB→GM写回）；     
->若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。
+> [!NOTE]    
+> **知识点（可选阅读）：算子核心代码文件实现原理**  
+> op_host/add_custom.cpp：实现Host侧的Tiling计算逻辑与算子原型注册；   
+> op_kernel/add_custom_tiling.h：定义Tiling分块策略的数据结构；  
+> op_kernel/add_custom.cpp：实现Kernel侧加法算子的具体计算逻辑（GM→UB搬运→向量加法→UB→GM写回）；     
+> 若需深入理解上述三个文件的功能与协作机制，除参考代码注释外，建议详细阅读<a href="https://www.hiascend.com/developer/blog/details/0239124507827469022" target="_blank">《昇腾Ascend C编程入门教程（纯干货）》</a>。
 
 #### 2.3.1 开发 op_kernel/add_custom_tiling.h
 
@@ -489,10 +489,10 @@ bash ./build.sh
 
 **2. 部署算子**   
 
->[!NOTE]说明   
->**知识点（可选阅读）：什么是部署算子**  
->部署算子是指将算子注册到CANN框架中，本质上是将算子的二进制文件拷贝至系统公共目录，使其他程序能够通过标准接口（如CANN API或PyTorch等）
->自动发现并调用该算子。\*.run格式的部署包可以简单理解为一种自解压的压缩包。
+> [!NOTE]   
+> **知识点（可选阅读）：什么是部署算子**  
+> 部署算子是指将算子注册到CANN框架中，本质上是将算子的二进制文件拷贝至系统公共目录，使其他程序能够通过标准接口（如CANN API或PyTorch等）
+> 自动发现并调用该算子。\*.run格式的部署包可以简单理解为一种自解压的压缩包。
 
 因各平台生成的算子部署包名称略有差异，执行以下脚本以自动定位并运行部署包（在固定环境中，实际等效于执行类似 ./build_out/custom_opp_ubuntu_aarch64.run 的命令）：
 
